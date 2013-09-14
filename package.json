@@ -1,0 +1,22 @@
+{
+  "name": "dinkum",
+  "description": "API Client Tools",
+  "version": "0.0.0",
+  "author": "nomilous <nomilous@gmail.com>",
+  "contributors": [
+    {
+      "name": "nomilous",
+      "email": "nomilous@gmail.com"
+    }
+  ],
+  "main": "./lib/dinkum",
+  "repository": "git@github.com:nomilous/dinkum.git",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "should": "~1.2.2",
+    "mocha": "~1.12.0",
+    "coffee-script": "~1.6.3",
+    "hound": "~1.0.4"
+  }
+}
