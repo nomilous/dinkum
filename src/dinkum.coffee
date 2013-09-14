@@ -1,3 +1,4 @@
 exports.client = 
 
-    BasicAuth = require './client/basic_auth'
+    CookieStore: require './client/cookie_store'
+    BasicAuth:   require './client/basic_auth'
