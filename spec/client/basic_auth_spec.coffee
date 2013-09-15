@@ -74,7 +74,7 @@ describe 'BasicAuth', ->
                 isFirstRequest = true
                 https.request = (opts, callback) ->
 
-                    if isFirstRequest  
+                    if isFirstRequest
                         isFirstRequest = false
 
                         #
@@ -86,34 +86,68 @@ describe 'BasicAuth', ->
                         #
 
                         should.not.exist opts.auth
-                        callback statusCode: 401
+                        process.nextTick -> callback 
+                            statusCode: 401
+                            on: ->
                         return
 
                     #
                     # isSecondRequest
                     #
-
                     opts.auth.should.equal 'morning:☆'
-                    done()
+                    process.nextTick -> callback 
+                        on: (event, listener) -> 
+                            if event == 'end' then listener()
                     
-                @session.get().then (response) -> 
+
+                @session.get().then (response) -> done()
 
 
             it 'rejects with Authentication Failed on second post with auth', (done) -> 
 
                 count = 0
                 https.request = (opts, callback) ->
-                    if ++count == 3 then throw new Error 'should not happen'
-                    callback statusCode: 401
+                    if count++ == 2 then throw new Error 'should not happen'
+                    process.nextTick -> callback 
+                        statusCode: 401
+                        on: ->
 
                 @session.get().then (->), (error) -> 
 
                     error.message.should.equal 'Authentication Failed'
                     done()
 
+            it 'can specify config.strictAuth and on when header www-authenticate = BASIC is also set' 
+            it 'pays attention to realm' 
+                # 
+                # header: 'www-authenticate': 'BASIC realm="Realm-Name"'
+                # 
+                # and, What does that """actualy""" mean?
+                # 
+
+
 
             it """does not reject with Authentication Failed on a second parallel request 
-                  while the first is still waiting for an authentication reply"""
+                  while the first is still waiting for an authentication reply""", (done) -> 
+
+
+                https.request = (opts, callback) ->
+                    
+                errors = {}
+                @session.get().then (->), (error) -> errors.request1 = error 
+                @session.get().then (->), (error) -> errors.request2 = error 
+
+                setTimeout (->
+
+                    should.not.exist errors.request1
+                    should.not.exist errors.request2
+                    done()
+
+
+                ), 100
+
+
+
 
 
             it 'queues requests while authentication is in progress'
