@@ -36,4 +36,4 @@ exports.create = (config) ->
                     cookieString += pair + '; '
 
             return undefined unless cookieString
-            return cookieString
+            return cookieString[0..-2]

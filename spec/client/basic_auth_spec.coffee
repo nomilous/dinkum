@@ -58,11 +58,10 @@ describe 'BasicAuth', ->
 
                 https.request = (opts) -> 
 
-                    opts.headers.cookie.should.equal 'erdős-number=2; morphy-number=5; '
+                    opts.headers.cookie.should.equal 'erdős-number=2; morphy-number=5;'
                     done()
 
-                cookies = @session.cookies
-                cookies.setCookie [
+                @session.cookies.setCookie [
                     'erdős-number=2;'
                     'morphy-number=5; Expires=Tue, 04-Dec-2442 19:00:00 GMT;'
                 ]
