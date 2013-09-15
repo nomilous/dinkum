@@ -457,14 +457,29 @@ describe 'BasicAuth', ->
                     hostname: 'localhost'
                     username: 'morning'
                     password: '☆'
-                    rateLimit: 3
+                    rateLimit: 1
 
                 responses = []
-                session.get(path: '/one').then   (r) -> responses.push r
+                session.get(path: '/one').then   (r) -> 
+
+                    responses.push r
+                    session.get(path: '/six').then (r) -> 
+
+                        responses.push r
+                        session.get(path: '/9ine').then (r) -> responses.push r
+                        session.get(path: '/ten').then (r) -> responses.push r
+
+                    session.get(path: '/seven').then (r) -> responses.push r
+                    session.get(path: '/eight').then (r) -> responses.push r
+
                 session.get(path: '/two').then   (r) -> responses.push r
                 session.get(path: '/three').then (r) -> responses.push r
                 session.get(path: '/four').then  (r) -> responses.push r
                 session.get(path: '/five').then  (r) -> responses.push r
+
+
+                # console.log JSON.stringify session.status(), null, 2
+
 
                 setTimeout (-> 
 
@@ -476,10 +491,16 @@ describe 'BasicAuth', ->
                         '3 /three'
                         '4 /four'
                         '5 /five'
+                        '6 /six'
+                        '7 /seven'
+                        '8 /eight'
+                        '9 /9ine'
+                        '10 /ten'
+
                     ]
                     done()
 
-                ), 100
+                ), 2  # <----------- first stop (for if this tests starts failing)
 
 
             it 'dequeues at new request'
