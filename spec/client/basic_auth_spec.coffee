@@ -84,13 +84,6 @@ describe 'BasicAuth', ->
 
     context 'methods', -> 
 
-        # before -> 
-        #     @session  = BasicAuth.create
-        #         hostname: 'localhost'
-        #         username: 'morning'
-        #         password: '☆'
-        #         limit:    1
-
         beforeEach -> 
             @request = https.request
             @now = Date.now
@@ -254,7 +247,7 @@ describe 'BasicAuth', ->
                     hostname: 'localhost'
                     username: 'morning'
                     password: '☆'
-                    limit:     2
+                    rateLimit: 2
 
                 flyWeight      = 100
                 welterWeight   = 150
@@ -275,7 +268,19 @@ describe 'BasicAuth', ->
                             # 
                             #
                             statusCode: 401
-                            on: ->
+                            on: (event, listener) -> 
+                                if event == 'end' then setTimeout listener, flyWeight
+                                                                                #
+                                                                                # confession, 
+                                                                                # 
+                                                                                # * i put this here on a 'feeling' that
+                                                                                #   it would fix the broken test.
+                                                                                # * it did.
+                                                                                # * i have spent no effort on clearly
+                                                                                #   understanding why.
+                                                                                # * i am amuzed by consequencial irony 
+                                                                                #   with regards the variable name 
+                                                                                # 
 
                     setTimeout (-> 
 
@@ -328,7 +333,7 @@ describe 'BasicAuth', ->
                     hostname: 'localhost'
                     username: 'morning'
                     password: '☆'
-                    limit: 3
+                    rateLimit: 3
 
                 #
                 # client could start more than one activity in parallel
@@ -355,7 +360,7 @@ describe 'BasicAuth', ->
                             results['401'].count++
                             callback 
                                 statusCode: 401
-                                on: (event, listener) -> 
+                                on: (event, listener) -> if event == 'end' then listener()
 
                     if opts.auth? then results.authrequests.count++
 
@@ -390,7 +395,7 @@ describe 'BasicAuth', ->
                     # no result yet
                     #
 
-                    responses.should.eql {}
+                    responses.should.eql first:  {}
                 ), 50
 
                 setTimeout (->
@@ -421,6 +426,7 @@ describe 'BasicAuth', ->
                     hostname: 'localhost'
                     username: 'morning'
                     password: '☆'
+                    rateLimit: 2
 
                 https.request = (opts, callback) -> 
 
@@ -430,12 +436,15 @@ describe 'BasicAuth', ->
                 session.get()
                 session.get()
 
+                session.queued.should.equal 3
+                session.active.should.equal 2
+
+
                 done()
 
             it 'sends queued requests before new requests'
+            it 'dequeues at each response if not authenticating'
             it 'rejects all queued requests on authentication failure'
-            it 'can control tolerable queuesize'
-            it 'can control concurrency limit'
             it 'rejects if queue size reaches queueLimit'
 
 

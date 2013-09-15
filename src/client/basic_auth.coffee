@@ -18,7 +18,7 @@ exports.create = (config) ->
     )
 
     config.port         ||= 443
-    config.limit        ?= 10   # limit concurrent requests (overflow is queued)
+    config.rateLimit        ?= 10   # limit concurrent requests (overflow is queued)
     # config.queueLimit   ||= 10   # limit size of queue (overflow or pending auth)
     #config.dequeueLimit ||= 10   # limit concurrent dequeue
     
@@ -33,39 +33,6 @@ exports.create = (config) ->
 
         cookies: CookieStore.create hostname: config.username
 
-        queued: {}
-        active: {}
-
-        status: -> 
-
-            pended = count: 0, requests: {}
-            sended = count: 0, requests: {}
-            now    = Date.now()
-
-            for seq of queued
-                do (seq) -> 
-                    pended.count++
-                    pended.requests[seq] =
-                        status:    queued[seq].status
-                        statusAge: now - queued[seq].statusAt
-                        path:      queued[seq].opts.path
-
-                #
-                # TODO: capacity to cancel queued requests
-                #
-
-            for seq of active
-                do (seq) -> 
-                    sended.count++
-                    sended.requests[seq] =
-                        status:    active[seq].status
-                        statusAge: now - active[seq].statusAt
-                        path:      active[seq].opts.path
-
-                        
-
-            return queued: pended, active: sended, done: done
-
         get: (opts = {}, promise = defer()) -> 
 
             #
@@ -78,20 +45,49 @@ exports.create = (config) ->
                                     #       or is there even such a thing?
                                     #
 
-            if authenticating and promise.sequence != authenticating
+            unless promise.sequence == authenticating
 
                 #
-                # NEW request while authentication is in progress, queue it
-                # TODO: limit queue size 
+                # cannot queue the authentication attempt
+                #
+
+                #
+                # TODO: reject at queueLimit
                 # 
 
-                queued[promise.sequence.toString()] = 
-                    status:    'pending auth'
-                    statusAt:  Date.now()
-                    promise:   promise
-                    opts:      opts
+                if authenticating
 
-                return promise.promise
+                    #
+                    # all new requests while authenticating are queued
+                    # 
+
+                    queued[promise.sequence.toString()] = 
+                    
+                        statusAt:  Date.now()
+                        status:    'pending auth'
+                        promise:   promise
+                        opts:      opts
+
+                    return promise.promise
+
+
+                if session.active >= config.rateLimit
+
+                    #
+                    # all new request that overflow rateLimit 
+                    #
+
+                    queued[promise.sequence.toString()] = 
+                    
+                        statusAt:  Date.now()
+                        status:    'rate limit'
+                        promise:   promise
+                        opts:      opts
+
+                    return promise.promise
+
+
+
 
             opts.method    = 'GET'
             opts.path    ||= '/'
@@ -167,6 +163,10 @@ exports.create = (config) ->
                                 #    responded to the first request with a 401
                                 #
 
+                                #
+                                # TODO: reject at queueLimit
+                                # 
+
                                 queued[promise.sequence.toString()] = 
                                     status:    'pending auth'
                                     statusAt:  Date.now()
@@ -202,6 +202,12 @@ exports.create = (config) ->
                         #            `this` promise is the one carrying the auth attempt
                         #
 
+
+                        #
+                        # TODO: this should dequeue if not currently authentication
+                        # TODO: what if the authorization request never returs?? 
+                        # 
+                        
                         if promise.sequence == authenticating 
 
                             authenticating = 0
@@ -209,7 +215,7 @@ exports.create = (config) ->
                             for seq of queued
                                 dqueue = queued[seq]
                                 delete queued[seq]
-                                if session.active > config.limit
+                                if session.active >= config.rateLimit
 
                                     #
                                     # too many active
@@ -220,9 +226,10 @@ exports.create = (config) ->
                                 session.get dqueue.opts, dqueue.promise
                                 
 
-                            #
-                            # TODO: what if the authorization request never returs??
-                            # 
+
+
+
+
 
                     response.on 'end', -> 
 
@@ -250,6 +257,41 @@ exports.create = (config) ->
             # 
 
             return promise.promise
+
+
+
+        queued: {}
+        active: {}
+
+        status: -> 
+
+            pended = count: 0, requests: {}
+            sended = count: 0, requests: {}
+            now    = Date.now()
+
+            for seq of queued
+                do (seq) -> 
+                    pended.count++
+                    pended.requests[seq] =
+                        status:    queued[seq].status
+                        statusAge: now - queued[seq].statusAt
+                        path:      queued[seq].opts.path
+
+                #
+                # TODO: capacity to cancel queued requests
+                #
+
+            for seq of active
+                do (seq) -> 
+                    sended.count++
+                    sended.requests[seq] =
+                        status:    active[seq].status
+                        statusAge: now - active[seq].statusAt
+                        path:      active[seq].opts.path
+
+                        
+
+            return queued: pended, active: sended, done: done
 
 
     Object.defineProperty session, 'queued', 
