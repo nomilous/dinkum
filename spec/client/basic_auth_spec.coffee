@@ -34,7 +34,7 @@ describe 'BasicAuth', ->
             https.request = @request
 
 
-        xcontext 'get', -> 
+        context 'get', -> 
 
 
             it 'returns a promise', (done) -> 
@@ -69,7 +69,7 @@ describe 'BasicAuth', ->
                 @session.get().then (response) -> 
 
 
-        xcontext 'auth', ->
+        context 'auth', ->
 
             it 're-requests with basicauth on HTTP 401', (done) -> 
 
@@ -155,7 +155,7 @@ describe 'BasicAuth', ->
 
                 flyWeight      = 100
                 welterWeight   = 150
-                heavyWeight    = 200
+                heavyWeight    = 350
 
                 firstRequest   = true
                 authInProgress = false
@@ -166,8 +166,8 @@ describe 'BasicAuth', ->
                         authInProgress = true
                         return callback 
                             #
-                            # mock response says auth require 
-                            # does immediiately to case initiation
+                            # mock response says auth required,
+                            # done immediately to case initiation of 
                             # authentication ahead of subsequent requests
                             # 
                             #
@@ -193,13 +193,13 @@ describe 'BasicAuth', ->
 
 
                 responses = {}
-                @session.get('/1').then  (response) -> responses.first  = response
-                @session.get('/2').then  (response) -> responses.second = response
-                @session.get('/3').then  (response) -> responses.third  = response
+                @session.get(path: '/1').then  (response) -> responses.first  = response
+                @session.get(path: '/2').then  (response) -> responses.second = response
+                @session.get(path: '/3').then  (response) -> responses.third  = response
 
                 setTimeout (->
 
-                    console.log before_auth_request: responses
+                    #console.log before_auth_request: responses
                     authInProgress.should.equal true
                     should.not.exist responses.first
                     should.not.exist responses.second
@@ -210,10 +210,10 @@ describe 'BasicAuth', ->
 
                 setTimeout (->
 
-                    console.log after_auth_response: responses
+                    #console.log after_auth_response: responses
                     should.exist responses.first
-                    # should.exist responses.second
-                    # should.exist responses.third
+                    should.exist responses.second
+                    should.exist responses.third
                     BigBeltBuckle()
 
                 ), heavyWeight
@@ -227,6 +227,9 @@ describe 'BasicAuth', ->
                 #
 
             it 'rejects all pended requests on authentication failure'
+
+            it 'con control tolerable queuesize'
+            it 'can control concurrency limit of de-queue'
 
             it 'does not queue beyond some sensible threshold'
 

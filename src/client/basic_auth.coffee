@@ -17,10 +17,14 @@ exports.create = (config) ->
 
     )
 
-    config.port  ||= 443
+    config.port         ||= 443
+    #config.queueLimit   ||= 10   # limit size of pending queue (auth in progress)
+    config.dequeueLimit ||= 10   # limit concurrent requests at dequeue
+    queue                 = {}
+
     authenticating = 0
     sequence       = 0
-    pending        = {}
+    
 
     session = 
 
@@ -38,8 +42,6 @@ exports.create = (config) ->
                                     #       or is there even such a thing?
                                     #
 
-            console.log process: opts
-
             if authenticating and promise.sequence != authenticating
 
                 #
@@ -47,9 +49,7 @@ exports.create = (config) ->
                 # TODO: limit queue size 
                 # 
 
-                console.log QUEUE_BEFORE: opts
-
-                pending[sequence.toString()] = opts: opts, promise: promise
+                queue[sequence.toString()] = opts: opts, promise: promise
                 return promise.promise
 
 
@@ -57,8 +57,10 @@ exports.create = (config) ->
             opts.path      = '/'
             opts.headers ||=  {}
 
+
             cookie = session.cookies.getCookie()
             opts.headers.cookie = cookie if cookie?
+
 
             request = https.request 
 
@@ -120,7 +122,7 @@ exports.create = (config) ->
                                 #
 
                                 console.log QUEUE_AFTER: opts
-                                pending[sequence.toString()] = opts: opts, promise: promise
+                                queue[sequence.toString()] = opts: opts, promise: promise
 
                                 return
 
@@ -155,11 +157,14 @@ exports.create = (config) ->
 
                             authenticating = 0
 
-                            console.log RELEASE_QUEUE: pending
+                            count = 1
+                            for seq of queue
+                                break if ++count > config.dequeueLimit
+                                session.get queue[seq].opts, queue[seq].promise
 
                             #
-                            # TODO: release the pending auth queue
-                            #
+                            # TODO: what if the authorization request never returs??
+                            # 
 
 
                     response.on 'end', -> 
