@@ -219,16 +219,99 @@ describe 'BasicAuth', ->
                 ), heavyWeight
 
 
-            it 'queues on 401s that follow the first unauthorized response'
+            it 'queues on 401s that follow the first unauthorized response', (done) ->
                 
                 #
                 # client could start more than one activity in parallel
                 # leading to multiple 401s
                 #
+                firsts = 
+                    '/1': true
+                    '/2': true
+                    '/3': true
+
+                results = 
+                    '401': count: 0
+                    authrequests: count: 0
+
+                https.request = (opts, callback) -> 
+
+                    if firsts[opts.path]
+                        #
+                        # each request receives 401 on first attempt
+                        #
+                        firsts[opts.path] = false
+                        return process.nextTick -> 
+                            results['401'].count++
+                            callback 
+                                statusCode: 401
+                                on: (event, listener) -> 
+
+                    if opts.auth? then results.authrequests.count++
+
+                    setTimeout (->
+                        callback 
+                            statusCode: 200
+                            on: (event, listener) -> 
+                                #
+                                # second attempt for each resolves
+                                #
+                                if event == 'end' then listener()
+
+                    ), 100
+
+                responses = {}
+                @session.get(path: '/1').then  (response) -> responses.first  = response
+                @session.get(path: '/2').then  (response) -> responses.second = response
+                @session.get(path: '/3').then  (response) -> responses.third  = response
+
+                setTimeout (->
+
+                    #
+                    # 3 requests were 401nd
+                    # only 1 auth has been sent
+                    #
+
+                    results.should.eql 
+                        '401': count: 3
+                        authrequests: count: 1
+
+                    #
+                    # no result yet
+                    #
+
+                    responses.should.eql {}
+                ), 50
+
+                setTimeout (->
+
+                    #
+                    # only 1 auth was ever sent
+                    #
+
+                    results.should.eql 
+                        '401': count: 3
+                        authrequests: count: 1
+
+                    #
+                    # all three have result
+                    #
+
+                    responses.should.eql  
+                        first:  {}
+                        second: {}
+                        third:  {}
+                    done()
+                ), 300
+
+
+            it 'can control tolerable queuesize'
+
+
 
             it 'rejects all pended requests on authentication failure'
 
-            it 'con control tolerable queuesize'
+            it 'can control tolerable queuesize'
             it 'can control concurrency limit of de-queue'
 
             it 'does not queue beyond some sensible threshold'

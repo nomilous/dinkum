@@ -49,18 +49,15 @@ exports.create = (config) ->
                 # TODO: limit queue size 
                 # 
 
-                queue[sequence.toString()] = opts: opts, promise: promise
+                queue[promise.sequence.toString()] = opts: opts, promise: promise
                 return promise.promise
 
-
             opts.method    = 'GET'
-            opts.path      = '/'
+            opts.path    ||= '/'
             opts.headers ||=  {}
-
 
             cookie = session.cookies.getCookie()
             opts.headers.cookie = cookie if cookie?
-
 
             request = https.request 
 
@@ -121,9 +118,7 @@ exports.create = (config) ->
                                 #    responded to the first request with a 401
                                 #
 
-                                console.log QUEUE_AFTER: opts
-                                queue[sequence.toString()] = opts: opts, promise: promise
-
+                                queue[promise.sequence.toString()] = opts: opts, promise: promise
                                 return
 
                         #
@@ -137,7 +132,6 @@ exports.create = (config) ->
                         authenticating = promise.sequence
                         opts.auth = "#{config.username}:#{config.password}"
                         session.get opts, promise
-                        return
 
                     else 
 
@@ -156,7 +150,6 @@ exports.create = (config) ->
                         if promise.sequence == authenticating 
 
                             authenticating = 0
-
                             count = 1
                             for seq of queue
                                 break if ++count > config.dequeueLimit
@@ -167,10 +160,8 @@ exports.create = (config) ->
                             # TODO: what if the authorization request never returs??
                             # 
 
-
                     response.on 'end', -> 
-
-
+                    
                         promise.resolve {}
                   
             #
