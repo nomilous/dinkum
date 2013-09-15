@@ -7,31 +7,33 @@ exports.create = (config) ->
     ) unless config.hostname?
 
     #
-    # keeping VERY simple for now
-    # ---------------------------
-    # 
-    # * Operating under the assumption that the server will only ever 
-    #   call set-cookie with the ENTIRE cookie set necessary to operate 
-    #   as client to the site.
-    # 
-    # * Despite that assumption being potentially incorrect i am never
-    #   the less storing cookies in an array that will be entirely over
-    #   written with the contents from each call to set-cookie.
-    # 
-    # * This one is definately a case of learning while doing instead 
-    #   of before.
-    # 
+    # store factory initialized with hostname to allow
+    # persistance later
+    #
 
-    store = []
+    return store = 
 
-    setCookie: (cookies) -> store = cookies
+        cookies: {}
 
-    getCookie: -> 
+        setCookie: (cookies) -> 
 
-        return unless store.length > 0
+            store.cookies[cookie] = Date.now() for cookie in cookies
 
-        store.map( (cookie) -> 
+        getCookie: -> 
 
-            try cookie.match(/(.*?);/)[1]
+            cookieString = ''       
+            for cookie of store.cookies
+                try 
+                    pair = cookie.match(/(.*?);/)[1]
 
-        ).join('; ') + ';'
+                    #
+                    # TODO: - pass request context into this fn
+                    #       - use it to filter for cookies to be sent
+                    #         according to expiry, path, httponly, etc
+                    #       - remove expired cookies
+                    #
+
+                    cookieString += pair + '; '
+
+            return undefined unless cookieString
+            return cookieString

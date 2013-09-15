@@ -1,5 +1,4 @@
 BasicAuth   = require '../../lib/client/basic_auth'
-CookieStore = require '../../lib/client/cookie_store'
 https       = require 'https'
 should      = require 'should'
 
@@ -59,7 +58,7 @@ describe 'BasicAuth', ->
 
                 https.request = (opts) -> 
 
-                    opts.headers.cookie.should.equal 'erdős-number=2; morphy-number=5;'
+                    opts.headers.cookie.should.equal 'erdős-number=2; morphy-number=5; '
                     done()
 
                 cookies = @session.cookies
