@@ -17,15 +17,20 @@ exports.create = (config) ->
 
     )
 
-    cookies = CookieStore.create config
     config.port ||= 443
 
     session = 
 
+        cookies: CookieStore.create hostname: config.username
+
         get: (opts = {}, deferral = defer()) -> 
 
-            opts.method = 'GET'
-            opts.path   = '/'
+            opts.method    = 'GET'
+            opts.path      = '/'
+            opts.headers ||=  {}
+
+            cookie = session.cookies.getCookie()
+            opts.headers.cookie = cookie if cookie?
 
             request = https.request 
 
@@ -33,8 +38,8 @@ exports.create = (config) ->
                 port:     config.port
                 path:     opts.path
                 method:   opts.method
-                headers:
-                    cookie: cookies.getCookie()
+                headers:  opts.headers
+                    
 
 
             return deferral.promise

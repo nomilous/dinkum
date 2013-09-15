@@ -1,6 +1,7 @@
-BasicAuth = require '../../lib/client/basic_auth'
-https     = require 'https'
-should    = require 'should'
+BasicAuth   = require '../../lib/client/basic_auth'
+CookieStore = require '../../lib/client/cookie_store'
+https       = require 'https'
+should      = require 'should'
 
 describe 'BasicAuth', -> 
 
@@ -22,22 +23,20 @@ describe 'BasicAuth', ->
     context 'methods', -> 
 
         before -> 
-
-            @session = BasicAuth.create
-
+            @session  = BasicAuth.create
                 hostname: 'localhost'
                 username: 'morning'
                 password: '☆'
 
         beforeEach -> 
-
             @request = https.request
 
         afterEach -> 
-
             https.request = @request
 
+
         context 'get', -> 
+
 
             it 'returns a promise', (done) -> 
 
@@ -45,14 +44,29 @@ describe 'BasicAuth', ->
                 should.exist @session.get().then
                 done()
 
+
             it 'defaults opts if unspecified', (done) -> 
 
                 https.request = (opts) -> 
-
                     opts.port.should.equal 443
                     opts.path.should.equal '/'
                     done()
 
                 @session.get().then (response) -> 
 
+
+            it 'sends cookies if present', (done) -> 
+
+                https.request = (opts) -> 
+
+                    opts.headers.cookie.should.equal 'erdős-number=2; morphy-number=5;'
+                    done()
+
+                cookies = @session.cookies
+                cookies.setCookie [
+                    'erdős-number=2;'
+                    'morphy-number=5; Expires=Tue, 04-Dec-2442 19:00:00 GMT;'
+                ]
+
+                @session.get().then (response) -> 
 
