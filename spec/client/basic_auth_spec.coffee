@@ -55,6 +55,7 @@ describe 'BasicAuth', ->
             process.nextTick ->
                 
                 #console.log JSON.stringify @session.status(),null, 2
+                session.queue.length.should.equal 2
                 session.status().should.eql 
                     queued: 
                         count: 2

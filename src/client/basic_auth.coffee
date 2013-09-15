@@ -32,6 +32,8 @@ exports.create = (config) ->
 
         cookies: CookieStore.create hostname: config.username
 
+        queue: {}
+
         status: -> 
 
             queued = count: 0, requests: {}
@@ -237,4 +239,14 @@ exports.create = (config) ->
             # 
 
             return promise.promise
+
+
+    Object.defineProperty session.queue, 'length', 
+        enumarable: true
+        get: ->  
+            count = 0 
+            count++ for seq of queue
+            count
+
+    return session
 
