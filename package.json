@@ -12,6 +12,7 @@
   "main": "./lib/dinkum",
   "repository": "git@github.com:nomilous/dinkum.git",
   "dependencies": {
+    "when": "~2.4.0"
   },
   "devDependencies": {
     "should": "~1.2.2",

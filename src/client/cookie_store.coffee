@@ -1,10 +1,10 @@
-exports.create = (opts) ->
+exports.create = (config) ->
 
     throw new Error( 
 
-        'CookieStore.create(opts) requires opts.hostname'
+        'CookieStore.create(config) requires config.hostname'
 
-    ) unless opts.hostname?
+    ) unless config.hostname?
 
     #
     # keeping VERY simple for now

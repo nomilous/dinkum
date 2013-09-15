@@ -3,13 +3,13 @@ should = require 'should'
 
 describe 'CookieStore', -> 
 
-    context 'create(opts)', ->
+    context 'create(config)', ->
 
-        it 'requires opts.hostname', (done) -> 
+        it 'requires config.hostname', (done) -> 
 
             try CookieStore.create {}
             catch error
-                error.should.match /requires opts.hostname/
+                error.should.match /requires config.hostname/
                 done() 
 
         it 'persists to a store of some kind' # later
@@ -21,7 +21,7 @@ describe 'CookieStore', ->
         # usually on response from server
         #
 
-        it 'stores or retreives the response cookie array', (done) -> 
+        it 'stores or retreives the cookie array', (done) -> 
 
             jar = CookieStore.create hostname: 'www.xxx.yyy.zzz'
 
@@ -29,6 +29,11 @@ describe 'CookieStore', ->
 
                 'outfit=birthday-suit; Expires=Tue, 16-Oct-1139 05:00:50 GMT;'
                 'shoes=0; Path=../garden; HttpOnly;'
+
+                                #
+                                # first version is ignoring these presumably 
+                                # cookie selection mechanisms 
+                                #
 
             ]
 
