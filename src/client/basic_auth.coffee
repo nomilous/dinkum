@@ -20,14 +20,13 @@ exports.create = (config) ->
     config.port  ||= 443
     authenticating = 0
     sequence       = 0
+    pending        = {}
 
     session = 
 
         cookies: CookieStore.create hostname: config.username
 
         get: (opts = {}, promise = defer()) -> 
-
-            console.log REQ: opts
 
             #
             # Assign sequence to each promise
@@ -38,6 +37,21 @@ exports.create = (config) ->
                                     # TODO: what happens at MAX_INT in javascript
                                     #       or is there even such a thing?
                                     #
+
+            console.log process: opts
+
+            if authenticating and promise.sequence != authenticating
+
+                #
+                # NEW request while authentication is in progress, queue it
+                # TODO: limit queue size 
+                # 
+
+                console.log QUEUE_BEFORE: opts
+
+                pending[sequence.toString()] = opts: opts, promise: promise
+                return promise.promise
+
 
             opts.method    = 'GET'
             opts.path      = '/'
@@ -101,14 +115,12 @@ exports.create = (config) ->
                             else 
 
                                 #
-                                # ...and this is a request that was sent while waiting
-                                #    for a response to the authentication request that
-                                #    that was sent after the first 401
-                                # 
-                                # TODO: These subsequent requests should more sensibly 
-                                #       be intercepted earlier. 
-                                #       They should not be posted
+                                # ...and this is a request that was sent before the server
+                                #    responded to the first request with a 401
                                 #
+
+                                console.log QUEUE_AFTER: opts
+                                pending[sequence.toString()] = opts: opts, promise: promise
 
                                 return
 
@@ -142,6 +154,8 @@ exports.create = (config) ->
                         if promise.sequence == authenticating 
 
                             authenticating = 0
+
+                            console.log RELEASE_QUEUE: pending
 
                             #
                             # TODO: release the pending auth queue

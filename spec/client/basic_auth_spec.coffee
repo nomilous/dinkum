@@ -159,12 +159,18 @@ describe 'BasicAuth', ->
 
                 firstRequest   = true
                 authInProgress = false
-                https.request = (opts, callback) -> 
+                https.request  = (opts, callback) -> 
 
-                    if firstRequest then return process.nextTick -> 
+                    if firstRequest 
                         firstRequest = false
                         authInProgress = true
-                        callback 
+                        return callback 
+                            #
+                            # mock response says auth require 
+                            # does immediiately to case initiation
+                            # authentication ahead of subsequent requests
+                            # 
+                            #
                             statusCode: 401
                             on: ->
 
@@ -175,25 +181,25 @@ describe 'BasicAuth', ->
                             # mock response object that fakes 200 and emits the
                             # inbound data stream completed event, to cause the
                             # promises to resolve
+                            # 
+                            # it does this ALMOST immediately... to test that 
+                            # the calls were not made while the auth is in progress
                             #
                             statusCode: 200
                             on: (event, listener) -> 
-
-                                if event == 'end'
-
-                                    listener()
+                                if event == 'end' then listener()
 
                     ), welterWeight
 
 
                 responses = {}
-                @session.get().then  (response) -> responses.first  = response
-                @session.get().then  (response) -> responses.second = response
-                @session.get().then  (response) -> responses.third  = response
-
+                @session.get('/1').then  (response) -> responses.first  = response
+                @session.get('/2').then  (response) -> responses.second = response
+                @session.get('/3').then  (response) -> responses.third  = response
 
                 setTimeout (->
 
+                    console.log before_auth_request: responses
                     authInProgress.should.equal true
                     should.not.exist responses.first
                     should.not.exist responses.second
@@ -201,9 +207,10 @@ describe 'BasicAuth', ->
 
                 ), flyWeight
 
+
                 setTimeout (->
 
-                    console.log responses
+                    console.log after_auth_response: responses
                     should.exist responses.first
                     # should.exist responses.second
                     # should.exist responses.third
@@ -211,6 +218,15 @@ describe 'BasicAuth', ->
 
                 ), heavyWeight
 
+
+            it 'queues on 401s that follow the first unauthorized response'
+                
+                #
+                # client could start more than one activity in parallel
+                # leading to multiple 401s
+                #
+
+            it 'rejects all pended requests on authentication failure'
 
             it 'does not queue beyond some sensible threshold'
 
