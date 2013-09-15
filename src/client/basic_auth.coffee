@@ -37,8 +37,17 @@ exports.create = (config) ->
                 hostname: config.hostname
                 port:     config.port
                 path:     opts.path
+                auth:     opts.auth
                 method:   opts.method
                 headers:  opts.headers
+
+                (response) -> 
+
+                    if response.statusCode == 401 
+
+                        opts.auth = "#{config.username}:#{config.password}"
+                        session.get opts, deferral
+                        return
                     
 
 

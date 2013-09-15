@@ -68,3 +68,36 @@ describe 'BasicAuth', ->
 
                 @session.get().then (response) -> 
 
+
+            it 're-requests with basicauth on HTTP 401', (done) -> 
+
+                isFirstRequest = true
+                https.request = (opts, callback) ->
+
+                    if isFirstRequest  
+                        isFirstRequest = false
+
+                        #
+                        # does not send auth string on all requests
+                        # -----------------------------------------
+                        # 
+                        # * servers may create a new session each time
+                        #   it receives an auth...
+                        #
+
+                        should.not.exist opts.auth
+                        callback statusCode: 401
+                        return
+
+                    #
+                    # isSecondRequest
+                    #
+
+                    opts.auth.should.equal 'morning:☆'
+                    done()
+                    
+                @session.get().then (response) -> 
+
+
+
+
