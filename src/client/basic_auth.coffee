@@ -5,7 +5,7 @@ exports.create = (config) ->
 
     throw new Error(
 
-        'BasicAuth.create(config) requires requires config.username, config.password, config.hostname'
+        'BasicAuth.create(config) requires config.username, config.password, config.hostname'
 
     ) unless (
 
