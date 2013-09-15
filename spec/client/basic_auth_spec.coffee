@@ -19,6 +19,67 @@ describe 'BasicAuth', ->
             error.should.match /requires config.username, config.password, config.hostname/
             done()
 
+    context 'status', -> 
+
+        beforeEach -> 
+            @request = https.request
+            @now = Date.now
+
+        afterEach -> 
+            https.request = @request
+            Date.now = @now
+
+
+        it 'reports on requests pending and requests in progress', (done) -> 
+
+            Date.now = -> 1 
+            first = true
+            https.request = (opts, callback) -> 
+                if first
+                    first = false
+                    callback 
+                        statusCode: 401
+                        on: ->
+
+            session = BasicAuth.create
+
+                hostname: 'www.www.www'
+                username: 'www'
+                password: 'y'
+
+
+            session.get(path: '/path/one').then   (response) -> responses.first  = response
+            session.get(path: '/path/two').then   (response) -> responses.second = response
+            session.get(path: '/path/three').then (response) -> responses.third  = response
+
+            process.nextTick ->
+                
+                #console.log JSON.stringify @session.status(),null, 2
+                session.status().should.eql 
+                    queued: 
+                        count: 2
+                        requests: 
+                            '3': 
+                                status:    'pending auth'
+                                statusAge: 0
+                                path:      '/path/two'
+                            '4':
+                                status:    'pending auth'
+                                statusAge: 0
+                                path:      '/path/three'
+                    buzy: 
+                        count: 1
+                        requests: 
+                            '2':
+                                status:   'sent'
+                                statusAge: 0
+                                path:     '/path/one'
+
+                    done: 
+                        total: 0
+                done()
+
+
     context 'methods', -> 
 
         before -> 
@@ -29,9 +90,12 @@ describe 'BasicAuth', ->
 
         beforeEach -> 
             @request = https.request
+            @now = Date.now
 
         afterEach -> 
             https.request = @request
+            Date.now = @now
+
 
 
         context 'get', -> 
@@ -316,36 +380,6 @@ describe 'BasicAuth', ->
 
             it 'does not queue beyond some sensible threshold'
 
-    context 'status', -> 
-
-        it 'reports on requests pending', (done) -> 
-
-            first = true
-            https.request = (opts, callback) -> 
-                if first
-                    first = false
-                    callback 
-                        statusCode: 401
-                        on: ->
-
-
-            @session.get(path: '/1').then  (response) -> responses.first  = response
-            @session.get(path: '/2').then  (response) -> responses.second = response
-            @session.get(path: '/3').then  (response) -> responses.third  = response
-
-            process.nextTick =>
-                console.log @session.status()
-                @session.status().should.eql 
-                    pending: 
-                        count: 2
-                        requests: 
-                            '15': 
-                                reason: 'auth'
-                                path: '/2'
-                            '16':
-                                reason: 'auth'
-                                path: '/3'
-                done()
 
 
     context 'logging', ->

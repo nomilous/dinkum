@@ -19,12 +19,14 @@ exports.create = (config) ->
 
     config.port         ||= 443
     #config.queueLimit   ||= 10   # limit size of pending queue (auth in progress)
-    config.dequeueLimit ||= 10   # limit concurrent requests at dequeue
-    queue                 = {}
+    config.dequeueLimit ||= 10    # limit concurrent requests at dequeue
+    
+    queue  = {}
+    buzy   = {}
+    done   = total: 0
 
     authenticating = 0
-    sequence       = 0
-    
+    sequence       = 1
 
     session = 
 
@@ -33,17 +35,32 @@ exports.create = (config) ->
         status: -> 
 
             queued = count: 0, requests: {}
+            sent   = count: 0, requests: {}
+            now    = Date.now()
+
             for seq of queue
                 do (seq) -> 
                     queued.count++
-                    queued.requests ||= {}
                     queued.requests[seq] =
-                        reason: queue[seq].reason
-                        path: queue[seq].opts.path
+                        status:    queue[seq].status
+                        statusAge: now - queue[seq].statusAt
+                        path:      queue[seq].opts.path
+
+                #
+                # TODO: capacity to cancel queued requests
+                #
+
+            for seq of buzy
+                do (seq) -> 
+                    sent.count++
+                    sent.requests[seq] =
+                        status:    buzy[seq].status
+                        statusAge: now - buzy[seq].statusAt
+                        path:      buzy[seq].opts.path
 
                         
 
-            return pending: queued
+            return queued: queued, buzy: sent, done: done
 
         get: (opts = {}, promise = defer()) -> 
 
@@ -65,9 +82,10 @@ exports.create = (config) ->
                 # 
 
                 queue[promise.sequence.toString()] = 
-                    reason:  'auth'
-                    promise: promise
-                    opts:    opts
+                    status:    'pending auth'
+                    statusAt:  Date.now()
+                    promise:   promise
+                    opts:      opts
 
                 return promise.promise
 
@@ -101,6 +119,14 @@ exports.create = (config) ->
                 #
 
                 (response) -> 
+
+                    if track = buzy[promise.sequence.toString()]
+                        track.status   = 'connected'
+                        track.statusAt = Date.now()
+                        #
+                        # TODO: finish/test states...
+                        #
+
 
                     if response.statusCode == 401 # TODO: other statii of similar meaning
 
@@ -138,9 +164,10 @@ exports.create = (config) ->
                                 #
 
                                 queue[promise.sequence.toString()] = 
-                                    reason:  'auth'
-                                    promise: promise
-                                    opts:    opts
+                                    status:    'pending auth'
+                                    statusAt:  Date.now()
+                                    promise:   promise
+                                    opts:      opts
 
                                     
                                 return
@@ -186,8 +213,19 @@ exports.create = (config) ->
 
                     response.on 'end', -> 
 
+                        done.total++
+                        delete buzy[promise.sequence.toString()]
                         promise.resolve {}
                   
+
+
+            buzy[promise.sequence.toString()] = 
+                status:    'sent'
+                statusAt:  Date.now()
+                promise:   promise
+                opts:      opts
+
+
             #
             # TODO: timeout (data timeout vs. connect timeout)
             #       perhaps also queue these
