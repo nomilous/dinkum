@@ -1,4 +1,5 @@
-{defer}     = require 'when'
+https       = require 'https'
+{defer}     = require 'when' 
 CookieStore = require './cookie_store'
 
 exports.create = (config) -> 
@@ -21,7 +22,20 @@ exports.create = (config) ->
 
     session = 
 
-        get: (opts, deferral = defer()) -> 
+        get: (opts = {}, deferral = defer()) -> 
+
+            opts.method = 'GET'
+            opts.path   = '/'
+
+            request = https.request 
+
+                hostname: config.hostname
+                port:     config.port
+                path:     opts.path
+                method:   opts.method
+                headers:
+                    cookie: cookies.getCookie()
+
 
             return deferral.promise
 

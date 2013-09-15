@@ -1,4 +1,5 @@
 BasicAuth = require '../../lib/client/basic_auth'
+https     = require 'https'
 should    = require 'should'
 
 describe 'BasicAuth', -> 
@@ -28,10 +29,30 @@ describe 'BasicAuth', ->
                 username: 'morning'
                 password: '☆'
 
+        beforeEach -> 
+
+            @request = https.request
+
+        afterEach -> 
+
+            https.request = @request
+
         context 'get', -> 
 
             it 'returns a promise', (done) -> 
 
+                https.request = -> 
                 should.exist @session.get().then
                 done()
+
+            it 'defaults opts if unspecified', (done) -> 
+
+                https.request = (opts) -> 
+
+                    opts.port.should.equal 443
+                    opts.path.should.equal '/'
+                    done()
+
+                @session.get().then (response) -> 
+
 
