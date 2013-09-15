@@ -161,6 +161,7 @@ exports.create = (config) ->
                             for seq of queue
                                 break if ++count > config.dequeueLimit
                                 session.get queue[seq].opts, queue[seq].promise
+                                delete queue[seq]
 
                             #
                             # TODO: what if the authorization request never returs??
