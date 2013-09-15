@@ -17,7 +17,8 @@ exports.create = (config) ->
 
     )
 
-    config.port ||= 443
+    config.port  ||= 443
+    authenticating = false
 
     session = 
 
@@ -41,11 +42,22 @@ exports.create = (config) ->
                 method:   opts.method
                 headers:  opts.headers
 
+                #
+                # TODO: include node/dinkum in agent string
+                #
+
                 (response) -> 
 
-                    if response.statusCode == 401 
+                    if response.statusCode == 401
+
+                        if authenticating
+
+                            deferral.reject new Error 'Authentication Failed'
+                            authenticating = false
+                            return
 
                         opts.auth = "#{config.username}:#{config.password}"
+                        authenticating = true
                         session.get opts, deferral
                         return
                     

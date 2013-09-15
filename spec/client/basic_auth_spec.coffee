@@ -99,5 +99,29 @@ describe 'BasicAuth', ->
                 @session.get().then (response) -> 
 
 
+            it 'rejects with Authentication Failed on second post with auth', (done) -> 
 
+                count = 0
+                https.request = (opts, callback) ->
+                    if ++count == 3 then throw new Error 'should not happen'
+                    callback statusCode: 401
+
+                @session.get().then (->), (error) -> 
+
+                    error.message.should.equal 'Authentication Failed'
+                    done()
+
+
+            it """does not reject with Authentication Failed on a second parallel request 
+                  while the first is still waiting for an authentication reply"""
+
+
+            it 'queues requests while authentication is in progress'
+
+
+            it 'does not queue beyond some sensible threshold'
+
+
+
+    context 'logging', ->
 
