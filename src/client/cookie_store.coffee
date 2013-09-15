@@ -24,3 +24,14 @@ exports.create = (opts) ->
 
     store = []
 
+    setCookie: (cookies) -> store = cookies
+
+    getCookie: -> 
+
+        return unless store.length > 0
+
+        store.map( (cookie) -> 
+
+            try cookie.match(/(.*?);/)[1]
+
+        ).join('; ') + ';'

@@ -15,23 +15,29 @@ describe 'CookieStore', ->
         it 'persists to a store of some kind' # later
 
 
-    context 'setCookie(array)', -> 
+    context '[set|get]Cookie()', -> 
 
         #
         # usually on response from server
         #
 
-        it 'stores the response cookie array'
+        it 'stores or retreives the response cookie array', (done) -> 
+
+            jar = CookieStore.create hostname: 'www.xxx.yyy.zzz'
+
+            jar.setCookie [
+
+                'outfit=birthday-suit; Expires=Tue, 16-Oct-1139 05:00:50 GMT;'
+                'shoes=0; Path=../garden; HttpOnly;'
+
+            ]
+
+            jar.getCookie().should.equal 'outfit=birthday-suit; shoes=0;'
+            done()
+
+        it 'returns undefined if no cookies', (done) -> 
 
 
-
-
-
-    context 'getCookie()', -> 
-
-        #
-        # usually preceding request to server
-        #
-
-        it 'gets the request cookie string'
-
+            jar = CookieStore.create hostname: 'www.ww.w'
+            should.not.exist jar.getCookie()
+            done()
