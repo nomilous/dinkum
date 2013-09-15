@@ -103,7 +103,7 @@ describe 'BasicAuth', ->
                 @session.get().then (response) -> done()
 
 
-            it 'rejects with Authentication Failed on second post with auth', (done) -> 
+            it 'rejects with Authentication Failed 401 as response to authentication attempt', (done) -> 
 
                 count = 0
                 https.request = (opts, callback) ->
