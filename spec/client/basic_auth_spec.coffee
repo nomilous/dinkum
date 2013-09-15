@@ -55,7 +55,8 @@ describe 'BasicAuth', ->
             process.nextTick ->
                 
                 #console.log JSON.stringify @session.status(),null, 2
-                session.queue.length.should.equal 2
+                session.queued.should.equal 2
+                session.active.should.equal 1
                 session.status().should.eql 
                     queued: 
                         count: 2
@@ -68,7 +69,7 @@ describe 'BasicAuth', ->
                                 status:    'pending auth'
                                 statusAge: 0
                                 path:      '/path/three'
-                    buzy: 
+                    active: 
                         count: 1
                         requests: 
                             '2':
@@ -83,11 +84,12 @@ describe 'BasicAuth', ->
 
     context 'methods', -> 
 
-        before -> 
-            @session  = BasicAuth.create
-                hostname: 'localhost'
-                username: 'morning'
-                password: '☆'
+        # before -> 
+        #     @session  = BasicAuth.create
+        #         hostname: 'localhost'
+        #         username: 'morning'
+        #         password: '☆'
+        #         limit:    1
 
         beforeEach -> 
             @request = https.request
@@ -104,39 +106,60 @@ describe 'BasicAuth', ->
 
             it 'returns a promise', (done) -> 
 
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
+
                 https.request = -> 
-                should.exist @session.get().then
+                should.exist session.get().then
                 done()
 
 
             it 'defaults opts if unspecified', (done) -> 
+
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
 
                 https.request = (opts) -> 
                     opts.port.should.equal 443
                     opts.path.should.equal '/'
                     done()
 
-                @session.get().then (response) -> 
+                session.get().then (response) -> 
 
 
             it 'sends cookies if present', (done) -> 
+
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
 
                 https.request = (opts) -> 
 
                     opts.headers.cookie.should.equal 'erdős-number=2; morphy-number=5;'
                     done()
 
-                @session.cookies.setCookie [
+                session.cookies.setCookie [
                     'erdős-number=2;'
                     'morphy-number=5; Expires=Tue, 04-Dec-2442 19:00:00 GMT;'
                 ]
 
-                @session.get().then (response) -> 
+                session.get().then (response) -> 
 
 
         context 'auth', ->
 
             it 're-requests with basicauth on HTTP 401', (done) -> 
+
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
+
 
                 isFirstRequest = true
                 https.request = (opts, callback) ->
@@ -167,10 +190,15 @@ describe 'BasicAuth', ->
                             if event == 'end' then listener()
                     
 
-                @session.get().then (response) -> done()
+                session.get().then (response) -> done()
 
 
             it 'rejects with Authentication Failed 401 as response to authentication attempt', (done) -> 
+
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
 
                 count = 0
                 https.request = (opts, callback) ->
@@ -179,7 +207,7 @@ describe 'BasicAuth', ->
                         statusCode: 401
                         on: ->
 
-                @session.get().then (->), (error) -> 
+                session.get().then (->), (error) -> 
 
                     error.message.should.equal 'Authentication Failed'
                     done()
@@ -197,12 +225,16 @@ describe 'BasicAuth', ->
             it """does not reject with Authentication Failed on a second parallel request 
                   while the first is still waiting for an authentication reply""", (done) -> 
 
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
 
                 https.request = (opts, callback) ->
                     
                 errors = {}
-                @session.get().then (->), (error) -> errors.request1 = error 
-                @session.get().then (->), (error) -> errors.request2 = error 
+                session.get().then (->), (error) -> errors.request1 = error 
+                session.get().then (->), (error) -> errors.request2 = error 
 
                 setTimeout (->
 
@@ -217,6 +249,12 @@ describe 'BasicAuth', ->
         context 'auth queue', ->
 
             it 'pends requests while authentication is in progress', (BigBeltBuckle) -> 
+
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
+                    limit:     2
 
                 flyWeight      = 100
                 welterWeight   = 150
@@ -258,9 +296,9 @@ describe 'BasicAuth', ->
 
 
                 responses = {}
-                @session.get(path: '/1').then  (response) -> responses.first  = response
-                @session.get(path: '/2').then  (response) -> responses.second = response
-                @session.get(path: '/3').then  (response) -> responses.third  = response
+                session.get(path: '/1').then  (response) -> responses.first  = response
+                session.get(path: '/2').then  (response) -> responses.second = response
+                session.get(path: '/3').then  (response) -> responses.third  = response
 
                 setTimeout (->
 
@@ -285,7 +323,13 @@ describe 'BasicAuth', ->
 
 
             it 'queues on 401s that follow the first unauthorized response', (done) ->
-                
+
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
+                    limit: 3
+
                 #
                 # client could start more than one activity in parallel
                 # leading to multiple 401s
@@ -327,9 +371,9 @@ describe 'BasicAuth', ->
                     ), 100
 
                 responses = {}
-                @session.get(path: '/1').then  (response) -> responses.first  = response
-                @session.get(path: '/2').then  (response) -> responses.second = response
-                @session.get(path: '/3').then  (response) -> responses.third  = response
+                session.get(path: '/1').then  (response) -> responses.first  = response
+                session.get(path: '/2').then  (response) -> responses.second = response
+                session.get(path: '/3').then  (response) -> responses.third  = response
 
                 setTimeout (->
 
@@ -371,15 +415,28 @@ describe 'BasicAuth', ->
                 ), 300
 
 
+            it 'can control concurrency limit', (done) -> 
+
+                session  = BasicAuth.create
+                    hostname: 'localhost'
+                    username: 'morning'
+                    password: '☆'
+
+                https.request = (opts, callback) -> 
+
+                session.get()
+                session.get()
+                session.get()
+                session.get()
+                session.get()
+
+                done()
+
+            it 'sends queued requests before new requests'
+            it 'rejects all queued requests on authentication failure'
             it 'can control tolerable queuesize'
-
-
-            it 'rejects all pended requests on authentication failure'
-
-            it 'can control tolerable queuesize'
-            it 'can control concurrency limit of de-queue'
-
-            it 'does not queue beyond some sensible threshold'
+            it 'can control concurrency limit'
+            it 'rejects if queue size reaches queueLimit'
 
 
 

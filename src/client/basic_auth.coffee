@@ -18,11 +18,12 @@ exports.create = (config) ->
     )
 
     config.port         ||= 443
-    #config.queueLimit   ||= 10   # limit size of pending queue (auth in progress)
-    config.dequeueLimit ||= 10    # limit concurrent requests at dequeue
+    config.limit        ?= 10   # limit concurrent requests (overflow is queued)
+    # config.queueLimit   ||= 10   # limit size of queue (overflow or pending auth)
+    #config.dequeueLimit ||= 10   # limit concurrent dequeue
     
-    queue  = {}
-    buzy   = {}
+    queued = {}
+    active = {}
     done   = total: 0
 
     authenticating = 0
@@ -32,37 +33,38 @@ exports.create = (config) ->
 
         cookies: CookieStore.create hostname: config.username
 
-        queue: {}
+        queued: {}
+        active: {}
 
         status: -> 
 
-            queued = count: 0, requests: {}
-            sent   = count: 0, requests: {}
+            pended = count: 0, requests: {}
+            sended = count: 0, requests: {}
             now    = Date.now()
 
-            for seq of queue
+            for seq of queued
                 do (seq) -> 
-                    queued.count++
-                    queued.requests[seq] =
-                        status:    queue[seq].status
-                        statusAge: now - queue[seq].statusAt
-                        path:      queue[seq].opts.path
+                    pended.count++
+                    pended.requests[seq] =
+                        status:    queued[seq].status
+                        statusAge: now - queued[seq].statusAt
+                        path:      queued[seq].opts.path
 
                 #
                 # TODO: capacity to cancel queued requests
                 #
 
-            for seq of buzy
+            for seq of active
                 do (seq) -> 
-                    sent.count++
-                    sent.requests[seq] =
-                        status:    buzy[seq].status
-                        statusAge: now - buzy[seq].statusAt
-                        path:      buzy[seq].opts.path
+                    sended.count++
+                    sended.requests[seq] =
+                        status:    active[seq].status
+                        statusAge: now - active[seq].statusAt
+                        path:      active[seq].opts.path
 
                         
 
-            return queued: queued, buzy: sent, done: done
+            return queued: pended, active: sended, done: done
 
         get: (opts = {}, promise = defer()) -> 
 
@@ -83,7 +85,7 @@ exports.create = (config) ->
                 # TODO: limit queue size 
                 # 
 
-                queue[promise.sequence.toString()] = 
+                queued[promise.sequence.toString()] = 
                     status:    'pending auth'
                     statusAt:  Date.now()
                     promise:   promise
@@ -122,7 +124,7 @@ exports.create = (config) ->
 
                 (response) -> 
 
-                    if track = buzy[promise.sequence.toString()]
+                    if track = active[promise.sequence.toString()]
                         track.status   = 'connected'
                         track.statusAt = Date.now()
                         #
@@ -165,7 +167,7 @@ exports.create = (config) ->
                                 #    responded to the first request with a 401
                                 #
 
-                                queue[promise.sequence.toString()] = 
+                                queued[promise.sequence.toString()] = 
                                     status:    'pending auth'
                                     statusAt:  Date.now()
                                     promise:   promise
@@ -203,11 +205,20 @@ exports.create = (config) ->
                         if promise.sequence == authenticating 
 
                             authenticating = 0
-                            count = 1
-                            for seq of queue
-                                break if ++count > config.dequeueLimit
-                                session.get queue[seq].opts, queue[seq].promise
-                                delete queue[seq]
+
+                            for seq of queued
+                                dqueue = queued[seq]
+                                delete queued[seq]
+                                if session.active > config.limit
+
+                                    #
+                                    # too many active
+                                    #
+
+                                    break
+
+                                session.get dqueue.opts, dqueue.promise
+                                
 
                             #
                             # TODO: what if the authorization request never returs??
@@ -216,12 +227,12 @@ exports.create = (config) ->
                     response.on 'end', -> 
 
                         done.total++
-                        delete buzy[promise.sequence.toString()]
+                        delete active[promise.sequence.toString()]
                         promise.resolve {}
                   
 
 
-            buzy[promise.sequence.toString()] = 
+            active[promise.sequence.toString()] = 
                 status:    'sent'
                 statusAt:  Date.now()
                 promise:   promise
@@ -241,12 +252,18 @@ exports.create = (config) ->
             return promise.promise
 
 
-    Object.defineProperty session.queue, 'length', 
+    Object.defineProperty session, 'queued', 
         enumarable: true
         get: ->  
             count = 0 
-            count++ for seq of queue
+            count++ for seq of queued
             count
 
-    return session
+    Object.defineProperty session, 'active', 
+        enumarable: true
+        get: ->  
+            count = 0 
+            count++ for seq of active
+            count
+
 
