@@ -36,7 +36,7 @@ exports.create = (config) ->
         get: (opts = {}, promise = defer()) -> 
 
             #
-            # Assign sequence to each promise
+            # Assign sequence (identity) to each promise
             # 
 
             promise.sequence ||= ++sequence
@@ -45,53 +45,78 @@ exports.create = (config) ->
                                     #       or is there even such a thing?
                                     #
 
-            unless promise.sequence == authenticating
-
-                #
-                # cannot queue the authentication attempt
-                #
-
-                #
-                # TODO: reject at queueLimit
-                # 
-
-                if authenticating
-
-                    #
-                    # all new requests while authenticating are queued
-                    # 
-
-                    queued[promise.sequence.toString()] = 
-                    
-                        statusAt:  Date.now()
-                        status:    'pending auth'
-                        promise:   promise
-                        opts:      opts
-
-                    return promise.promise
-
-
-                if session.active >= config.rateLimit
-
-                    #
-                    # all new request that overflow rateLimit 
-                    #
-
-                    queued[promise.sequence.toString()] = 
-                    
-                        statusAt:  Date.now()
-                        status:    'rate limit'
-                        promise:   promise
-                        opts:      opts
-
-                    return promise.promise
-
-
-
-
             opts.method    = 'GET'
             opts.path    ||= '/'
             opts.headers ||=  {}
+
+            #
+            # TODO: reject at queueLimit
+            # 
+
+            if authenticating
+
+                if promise.sequence == authenticating
+
+                    #
+                    # cannot queue the authentication attempt
+                    #
+
+                    session.dequeue opts: opts, promise: promise
+                    return promise.promise
+
+
+                #
+                # all other new requests while authenticating are queued
+                # 
+
+                queued[promise.sequence.toString()] = 
+                
+                    statusAt:  Date.now()
+                    status:    'pending auth'
+                    promise:   promise
+                    opts:      opts
+
+                return promise.promise
+
+
+            # console.log nqueue: 
+            #     seq: promise.sequence
+            #     path: opts.path
+
+            queued[promise.sequence.toString()] = 
+            
+                statusAt:  Date.now()
+                status:    'rate limit'
+                promise:   promise
+                opts:      opts
+
+            #
+            # first in first out
+            # ------------------
+            #
+
+            slots = config.rateLimit - session.active
+            for seq of queued
+                break if slots-- == 0
+                session.dequeue queued[seq]
+                    
+
+            return promise.promise
+
+
+        dequeue: ({opts, promise}) ->
+
+            # console.log DQUEUE: 
+            #     seq: promise.sequence
+            #     path: opts.path
+
+            active[promise.sequence.toString()] = 
+                status:    'dqueue'
+                statusAt:  Date.now()
+                promise:   promise
+                opts:      opts
+
+            delete queued[promise.sequence.toString()]
 
             cookie = session.cookies.getCookie()
             opts.headers.cookie = cookie if cookie?
@@ -207,27 +232,46 @@ exports.create = (config) ->
                         # TODO: this should dequeue if not currently authentication
                         # TODO: what if the authorization request never returs?? 
                         # 
-                        
-                        if promise.sequence == authenticating 
 
-                            authenticating = 0
+                        if authenticating 
 
-                            for seq of queued
-                                dqueue = queued[seq]
-                                delete queued[seq]
-                                if session.active >= config.rateLimit
+                            authenticating = 0 if promise.sequence == authenticating
 
-                                    #
-                                    # too many active
-                                    #
-
-                                    break
-
-                                session.get dqueue.opts, dqueue.promise
-                                
+                        # unless authenticating
+                        #     console.log queue: queued
+                        #     for seq of queued
+                        #         break if session.active - 1 >= config.rateLimit
+                        #         dqueue = queued[seq]
+                        #         delete queued[seq]
+                        #         console.log dequeue: dqueue.opts.path
+                        #         session.get dqueue.opts, dqueue.promise
 
 
+                    result = 
 
+                        #
+                        # this accumulates the result body as AS STRING
+                        # ---------------------------------------------
+                        # 
+                        # 
+                        # TODO: options to control this accumulation and
+                        #       notify on progress across large datasets
+                        #       arriving in multi-part
+                        # eg.
+                        # 
+                        # * ability to send the buffer chunks out on the
+                        #   the promise notification to write directly 
+                        #   to disk (for large resultsets, decompression
+                        #   and progress notifiyability)
+                        #   
+
+                        statusCode: response.statusCode
+                        headers:    response.headers
+                        body:       ''
+
+                    response.on 'data', (chunk) -> 
+
+                        result.body += chunk.toString()
 
 
 
@@ -235,15 +279,21 @@ exports.create = (config) ->
 
                         done.total++
                         delete active[promise.sequence.toString()]
-                        promise.resolve {}
+                        promise.resolve result
+
+                        #
+                        # first in first out
+                        # ------------------
+                        #
+
+                        slots = config.rateLimit - session.active
+                        for seq of queued
+                            break if slots-- == 0
+                            session.dequeue queued[seq]
                   
 
-
-            active[promise.sequence.toString()] = 
-                status:    'sent'
-                statusAt:  Date.now()
-                promise:   promise
-                opts:      opts
+            active[promise.sequence.toString()].status   = 'sent'
+            active[promise.sequence.toString()].statusAt = Date.now()
 
 
             #
