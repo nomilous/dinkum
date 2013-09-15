@@ -53,7 +53,16 @@ exports.create = (config) ->
                 method:   opts.method
                 headers:  opts.headers
 
-                #
+                # 
+                # TODO: some servers may have no notion of session at all, the auth
+                #       header will then need to be sent on every request
+                # 
+                # TODO: in some cases it may be necessary to not send any cookies on
+                #       the request carrying the authentication payload 
+                # 
+                #       eg. a peculiarly implemented server might not like to 
+                #           authorize a session it has already rejected 
+                # 
                 # TODO: include node/dinkum in agent string
                 #
 
@@ -102,13 +111,15 @@ exports.create = (config) ->
                                 return
 
                         #
-                        # Mark the promise carrying the auth request and 
-                        # set the same mark (sequence number) as the 
-                        # authentication in progress flag
+                        # Mark which of the promise sequence numbers is carrying the 
+                        # auth attempt and recurse the request with the same promise, 
+                        # this time including credentials into the auth header.
+                        # 
+                        # NOTE: node.https module does the encrypt on the creds.
                         # 
 
-                        opts.auth = "#{config.username}:#{config.password}"
                         authenticating = promise.sequence
+                        opts.auth = "#{config.username}:#{config.password}"
                         session.get opts, promise
                         return
 
@@ -123,7 +134,7 @@ exports.create = (config) ->
                         #            the other request is still pending authorization
                         # 
                         #            so this MUST ONLY set authentication to done if
-                        #            the promise is the one carrying the auth attempt
+                        #            `this` promise is the one carrying the auth attempt
                         #
 
                         if promise.sequence == authenticating 
