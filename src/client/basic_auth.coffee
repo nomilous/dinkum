@@ -27,6 +27,8 @@ exports.create = (config) ->
 
         get: (opts = {}, promise = defer()) -> 
 
+            console.log REQ: opts
+
             #
             # Assign sequence to each promise
             # 
@@ -128,7 +130,7 @@ exports.create = (config) ->
                         #
                         # not 401, set authentication to done
                         # 
-                        # IMPORTANT: server may have resources that to not require
+                        # IMPORTANT: server may have resources that do not require
                         #            authentication, so it is possible that a request
                         #            will pass through here without the 401 even while
                         #            the other request is still pending authorization
@@ -150,8 +152,16 @@ exports.create = (config) ->
 
 
                         promise.resolve {}
-                    
-
+                  
+            #
+            # TODO: timeout (data timeout vs. connect timeout)
+            #       perhaps also queue these
+            # 
+            # request.on 'socket', (socket) -> 
+            #    socket.setTimeout config.timeout
+            #    socket.on 'timeout', -> request.abort()  
+            # 
+            # 
 
             return promise.promise
 

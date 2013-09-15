@@ -34,7 +34,7 @@ describe 'BasicAuth', ->
             https.request = @request
 
 
-        context 'get', -> 
+        xcontext 'get', -> 
 
 
             it 'returns a promise', (done) -> 
@@ -68,6 +68,8 @@ describe 'BasicAuth', ->
 
                 @session.get().then (response) -> 
 
+
+        xcontext 'auth', ->
 
             it 're-requests with basicauth on HTTP 401', (done) -> 
 
@@ -147,10 +149,67 @@ describe 'BasicAuth', ->
                 ), 100
 
 
+        context 'auth queue', ->
+
+            it 'pends requests while authentication is in progress', (BigBeltBuckle) -> 
+
+                flyWeight      = 100
+                welterWeight   = 150
+                heavyWeight    = 200
+
+                firstRequest   = true
+                authInProgress = false
+                https.request = (opts, callback) -> 
+
+                    if firstRequest then return process.nextTick -> 
+                        firstRequest = false
+                        authInProgress = true
+                        callback 
+                            statusCode: 401
+                            on: ->
+
+                    setTimeout (-> 
+
+                        callback
+                            #
+                            # mock response object that fakes 200 and emits the
+                            # inbound data stream completed event, to cause the
+                            # promises to resolve
+                            #
+                            statusCode: 200
+                            on: (event, listener) -> 
+
+                                if event == 'end'
+
+                                    listener()
+
+                    ), welterWeight
 
 
+                responses = {}
+                @session.get().then  (response) -> responses.first  = response
+                @session.get().then  (response) -> responses.second = response
+                @session.get().then  (response) -> responses.third  = response
 
-            it 'queues requests while authentication is in progress'
+
+                setTimeout (->
+
+                    authInProgress.should.equal true
+                    should.not.exist responses.first
+                    should.not.exist responses.second
+                    should.not.exist responses.third
+
+                ), flyWeight
+
+                setTimeout (->
+
+                    console.log responses
+                    should.exist responses.first
+                    # should.exist responses.second
+                    # should.exist responses.third
+                    BigBeltBuckle()
+
+                ), heavyWeight
 
 
             it 'does not queue beyond some sensible threshold'
