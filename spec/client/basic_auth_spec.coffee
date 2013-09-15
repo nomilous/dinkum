@@ -238,7 +238,8 @@ describe 'BasicAuth', ->
 
                     if firsts[opts.path]
                         #
-                        # each request receives 401 on first attempt
+                        # multiple first requests in parallel, 
+                        # each receives 401
                         #
                         firsts[opts.path] = false
                         return process.nextTick -> 
@@ -308,7 +309,6 @@ describe 'BasicAuth', ->
             it 'can control tolerable queuesize'
 
 
-
             it 'rejects all pended requests on authentication failure'
 
             it 'can control tolerable queuesize'
@@ -316,6 +316,36 @@ describe 'BasicAuth', ->
 
             it 'does not queue beyond some sensible threshold'
 
+    context 'status', -> 
+
+        it 'reports on requests pending', (done) -> 
+
+            first = true
+            https.request = (opts, callback) -> 
+                if first
+                    first = false
+                    callback 
+                        statusCode: 401
+                        on: ->
+
+
+            @session.get(path: '/1').then  (response) -> responses.first  = response
+            @session.get(path: '/2').then  (response) -> responses.second = response
+            @session.get(path: '/3').then  (response) -> responses.third  = response
+
+            process.nextTick =>
+                console.log @session.status()
+                @session.status().should.eql 
+                    pending: 
+                        count: 2
+                        requests: 
+                            '15': 
+                                reason: 'auth'
+                                path: '/2'
+                            '16':
+                                reason: 'auth'
+                                path: '/3'
+                done()
 
 
     context 'logging', ->

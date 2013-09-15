@@ -30,6 +30,21 @@ exports.create = (config) ->
 
         cookies: CookieStore.create hostname: config.username
 
+        status: -> 
+
+            queued = count: 0, requests: {}
+            for seq of queue
+                do (seq) -> 
+                    queued.count++
+                    queued.requests ||= {}
+                    queued.requests[seq] =
+                        reason: queue[seq].reason
+                        path: queue[seq].opts.path
+
+                        
+
+            return pending: queued
+
         get: (opts = {}, promise = defer()) -> 
 
             #
@@ -49,7 +64,11 @@ exports.create = (config) ->
                 # TODO: limit queue size 
                 # 
 
-                queue[promise.sequence.toString()] = opts: opts, promise: promise
+                queue[promise.sequence.toString()] = 
+                    reason:  'auth'
+                    promise: promise
+                    opts:    opts
+
                 return promise.promise
 
             opts.method    = 'GET'
@@ -118,7 +137,12 @@ exports.create = (config) ->
                                 #    responded to the first request with a 401
                                 #
 
-                                queue[promise.sequence.toString()] = opts: opts, promise: promise
+                                queue[promise.sequence.toString()] = 
+                                    reason:  'auth'
+                                    promise: promise
+                                    opts:    opts
+
+                                    
                                 return
 
                         #
@@ -161,7 +185,7 @@ exports.create = (config) ->
                             # 
 
                     response.on 'end', -> 
-                    
+
                         promise.resolve {}
                   
             #
