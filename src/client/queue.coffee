@@ -6,6 +6,7 @@ exports.testable = -> queue
 exports.queue = (config = {}) -> 
 
     config.queueLimit ?= 100
+    config.rateLimit  ?= 10
 
     queue = 
 
@@ -28,15 +29,25 @@ exports.queue = (config = {}) ->
             queue.pending.count++
             action.resolve()
 
+
         dequeue: promised (action) -> 
 
-            for seq of queue.pending.items
-                queue.active.items[seq] = queue.pending.items[seq]
-                delete queue.pending.items[seq]
-                queue.active.count++
-                queue.pending.count--
-                action.resolve [queue.active.items[seq]]
-                break
+            slots = config.rateLimit - queue.active.count
+            action.resolve( 
+
+                for seq of queue.pending.items
+
+                    break if --slots < 0
+
+                    object = queue.pending.items[seq]
+                    queue.active.items[seq] = object
+                    delete queue.pending.items[seq]
+                    queue.active.count++
+                    queue.pending.count--
+                    object
+            )
+            
+
 
     return api = 
 

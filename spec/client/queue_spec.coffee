@@ -48,14 +48,13 @@ describe 'queue', ->
             instance.dequeue() 
 
             testable().pending.should.eql 
-                count: 1
-                items: 
-                    '2': object: 'THING B'
-
+                count: 0
+                items: {}
             testable().active.should.eql
-                count: 1
+                count: 2
                 items: 
                     '1': object: 'THING A'
+                    '2': object: 'THING B'
 
             done()
 
@@ -63,11 +62,33 @@ describe 'queue', ->
         it 'resolves with the array of dequeued objects', (done) -> 
 
             instance = queue()
+
             instance.enqueue 'THING A'
-            instance.enqueue 'THING B'
 
             instance.dequeue().then (objects) -> 
 
                 objects.should.eql [ { object: 'THING A' } ]
+                done()
+
+
+        it 'rateLimits dequeue according to the number of objects on the active queue', (done) -> 
+
+            instance = queue rateLimit: 4
+                
+            instance.enqueue 'THING A'
+            instance.enqueue 'THING B'
+            instance.enqueue 'THING C'
+            instance.enqueue 'THING D'
+            instance.enqueue 'THING E'
+
+            instance.dequeue().then (objects) -> 
+
+                #console.log objects
+
+                objects.length.should.equal 4
+                testable().pending.should.eql 
+                    count: 1
+                    items: 
+                        '5': object: 'THING E'
                 done()
 
