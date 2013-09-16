@@ -5,13 +5,13 @@ describe 'queue', ->
 
     context 'enqueue', -> 
 
-        it 'sequences objects onto the queue', (done) -> 
+        it 'sequences objects onto the pending queue', (done) -> 
 
             instance = queue()
             instance.enqueue 'THING A'
             instance.enqueue 'THING B'
 
-            testable().queued.should.eql 
+            testable().pending.should.eql 
 
                 count: 2
                 items: 
@@ -19,3 +19,31 @@ describe 'queue', ->
                     '2': object: 'THING B'
 
             done()
+
+        it 'allows for future persistable queue', (done) -> 
+
+            instance = queue()
+            instance.enqueue('THING A').then -> done() # saving to queue
+        
+
+    context 'dequeue', ->
+
+        it 'transfers items onto the active queue', (done) -> 
+
+            instance = queue()
+            instance.enqueue 'THING A'
+            instance.enqueue 'THING B'
+            instance.dequeue() 
+
+            testable().pending.should.eql 
+                count: 1
+                items: 
+                    '2': object: 'THING B'
+
+            testable().active.should.eql
+                count: 1
+                items: 
+                    '1': object: 'THING A'
+
+            done()
+
