@@ -99,5 +99,5 @@ describe 'extend', ->
         Class      = extend superclass, -> w: -> 0
         instance   = Class()
         instance.x().should.equal 1
-        done()
+        bird()
 

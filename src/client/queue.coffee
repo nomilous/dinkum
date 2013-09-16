@@ -1,11 +1,18 @@
 {extend} = require '../support'
 
-exports.functions = functions = 
-    
-    someFunction: -> 
+queue = undefined
+exports.testable = -> queue
 
+exports.create = (config) -> 
 
-exports.create = extend functions, (config) ->
+    queue = 
 
-    test: ->
+        sequence: 0
+        queued: {}
+        enqueue: (object) -> 
 
+            queue.queued[ (++queue.sequence).toString() ] = object: object
+
+    return api = 
+
+        enqueue: queue.enqueue
