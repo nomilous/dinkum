@@ -61,3 +61,22 @@ describe 'extend', ->
         instance.status().should.equal 'OK'
         done()
 
+
+    it 'can chain the scope into the superclass', (done) ->
+
+        superclass = ({authtype}) -> 
+
+            authenticate: -> "with #{authtype}"
+
+        createClient = extend superclass, ({transport}) -> 
+
+            get: -> "with #{transport}"
+
+        instance = createClient 
+
+            transport: 'https'
+            authtype:  'basic'
+            
+        instance.get().should.equal "with https"
+        instance.authenticate().should.equal "with basic"
+        done()
