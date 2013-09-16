@@ -3,6 +3,7 @@ should = require 'should'
 
 describe 'extend', -> 
 
+
     it 'appends the set of properties from a super object', (done) -> 
 
         SuperClass =
@@ -40,5 +41,23 @@ describe 'extend', ->
             status: -> 'EXCELENT'
 
         object.status().should.equal 'EXCELENT'
+        done()
+
+
+    it 'can create a scoped-class factory', (done) -> 
+
+        SuperClass = 
+            authenticate: ->
+            status: -> 'OK'
+
+
+        createClass = extend SuperClass, (tpt) -> 
+            get: -> "got with #{tpt}"
+                
+
+        instance = createClass 'https'
+
+        instance.get().should.equal 'got with https'
+        instance.status().should.equal 'OK'
         done()
 
