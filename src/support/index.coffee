@@ -1,2 +1,2 @@
-exports.extend = require './extend'
-exports.defers = require './defers'
+exports.extend   = require './extend'
+exports.promised = require './promised'

@@ -1,9 +1,11 @@
-{extend, defers} = require '../support'
+{extend, promised} = require '../support'
 
 queue = undefined
 exports.testable = -> queue
 
-exports.queue = (config) -> 
+exports.queue = (config = {}) -> 
+
+    config.queueLimit ?= 100
 
     queue = 
 
@@ -16,19 +18,24 @@ exports.queue = (config) ->
             items: {}
 
 
-        enqueue: defers (promised, object) -> 
+        enqueue: promised (action, object) -> 
+
+            return action.reject(
+                new Error 'dinkum queue overflow'
+                ) if queue.pending.count == config.queueLimit
 
             queue.pending.items[ (++queue.sequence).toString() ] = object: object
             queue.pending.count++
-            promised.resolve()
+            action.resolve()
 
-        dequeue: -> 
+        dequeue: promised (action) -> 
 
             for seq of queue.pending.items
                 queue.active.items[seq] = queue.pending.items[seq]
                 delete queue.pending.items[seq]
                 queue.active.count++
                 queue.pending.count--
+                action.resolve [queue.active.items[seq]]
                 break
 
     return api = 

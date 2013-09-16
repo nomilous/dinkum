@@ -24,6 +24,18 @@ describe 'queue', ->
 
             instance = queue()
             instance.enqueue('THING A').then -> done() # saving to queue
+
+        it 'rejects on queueLimit overflow', (done) -> 
+
+            instance = queue 
+
+                queueLimit: 1
+
+            instance.enqueue 'THING A'
+            instance.enqueue('THING B').then (->), (error) -> 
+
+                error.message.should.equal 'dinkum queue overflow'
+                done()
         
 
     context 'dequeue', ->
@@ -46,4 +58,16 @@ describe 'queue', ->
                     '1': object: 'THING A'
 
             done()
+
+
+        it 'resolves with the array of dequeued objects', (done) -> 
+
+            instance = queue()
+            instance.enqueue 'THING A'
+            instance.enqueue 'THING B'
+
+            instance.dequeue().then (objects) -> 
+
+                objects.should.eql [ { object: 'THING A' } ]
+                done()
 
