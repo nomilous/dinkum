@@ -51,11 +51,11 @@ describe 'extend', ->
             status: -> 'OK'
 
 
-        createClass = extend SuperClass, (tpt) -> 
+        create = extend SuperClass, (tpt) -> 
             get: -> "got with #{tpt}"
                 
 
-        instance = createClass 'https'
+        instance = create 'https'
 
         instance.get().should.equal 'got with https'
         instance.status().should.equal 'OK'
