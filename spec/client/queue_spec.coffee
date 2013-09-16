@@ -70,6 +70,14 @@ describe 'queue', ->
                 objects.should.eql [ { object: 'THING A' } ]
                 done()
 
+        it 'resolves with empty array when the queue is empty', (done) ->
+
+            instance = queue()
+            instance.dequeue().then (objects) -> 
+
+                objects.length.should.equal 0
+                done()
+
 
         it 'rateLimits dequeue according to the number of objects on the active queue', (done) -> 
 
@@ -91,4 +99,28 @@ describe 'queue', ->
                     items: 
                         '5': object: 'THING E'
                 done()
+
+
+    context 'queue.status', -> 
+
+        it 'provides report on status', (done) -> 
+
+            instance = queue
+
+                queueLimit: 1000
+                rateLimit:  100
+
+            instance.enqueue 'THING' for i in [0..9999]
+            instance.dequeue()
+            instance.queue.stat().then (stats) -> 
+
+                stats.should.eql
+
+                    pending: count: 900
+                    active:  count: 100
+
+                done()
+
+
+
 

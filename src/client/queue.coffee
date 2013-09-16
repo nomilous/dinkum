@@ -46,10 +46,19 @@ exports.queue = (config = {}) ->
                     queue.pending.count--
                     object
             )
-            
+        
+
+        queue: stat: promised (action) ->
+
+            action.resolve 
+                pending: 
+                    count: queue.pending.count
+                active:
+                    count: queue.active.count
 
 
     return api = 
 
         enqueue: queue.enqueue
         dequeue: queue.dequeue
+        queue:   queue.queue
