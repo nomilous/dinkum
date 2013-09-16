@@ -91,3 +91,13 @@ describe 'extend', ->
         done()
 
 
+    is: it 'a', (bird) -> 
+
+        hyperclass = -> x: -> 1
+        ultraclass = extend hyperclass, -> y: -> 0
+        superclass = extend ultraclass, -> z: -> 0
+        Class      = extend superclass, -> w: -> 0
+        instance   = Class()
+        instance.x().should.equal 1
+        done()
+
