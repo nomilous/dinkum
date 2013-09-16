@@ -48,7 +48,7 @@ exports.queue = (config = {}) ->
             )
         
 
-        queue: stat: promised (action) ->
+        queue: stats: promised (action) ->
 
             action.resolve 
                 pending: 

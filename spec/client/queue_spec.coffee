@@ -112,7 +112,7 @@ describe 'queue', ->
 
             instance.enqueue 'THING' for i in [0..9999]
             instance.dequeue()
-            instance.queue.stat().then (stats) -> 
+            instance.queue.stats().then (stats) -> 
 
                 stats.should.eql
 
