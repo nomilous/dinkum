@@ -1,5 +1,13 @@
-module.exports = (superFn, fn = ->) -> 
+module.exports = (superFn, fn = {}) -> 
+
+    unless typeof fn is 'function'
+
+        object = fn
+        object[property] ||= superFn[property] for property of superFn
+        return object
     
-    fn[property] ||= superFn[property] for property of superFn
-    return fn
-    
+    return -> 
+
+        object = fn.apply this, arguments
+        object[property] ||= superFn[property] for property of superFn
+        return object
