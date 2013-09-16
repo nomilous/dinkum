@@ -1,4 +1,6 @@
-Client = require '../../lib/client/client'
+{client} = require '../../lib/client/client'
+
+console.log client()
 
 describe 'Client', ->
 
