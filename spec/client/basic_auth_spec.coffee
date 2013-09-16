@@ -134,46 +134,6 @@ describe 'BasicAuth', ->
 
         context 'auth', ->
 
-            it 're-requests with basicauth on HTTP 401', (done) -> 
-
-                session  = BasicAuth.create
-                    hostname: 'localhost'
-                    username: 'morning'
-                    password: '☆'
-
-
-                isFirstRequest = true
-                https.request = (opts, callback) ->
-
-                    if isFirstRequest
-                        isFirstRequest = false
-
-                        #
-                        # does not send auth string on all requests
-                        # -----------------------------------------
-                        # 
-                        # * servers may create a new session each time
-                        #   it receives an auth...
-                        #
-
-                        should.not.exist opts.auth
-                        process.nextTick -> callback 
-                            statusCode: 401
-                            on: ->
-                        return
-
-                    #
-                    # isSecondRequest
-                    #
-                    opts.auth.should.equal 'morning:☆'
-                    process.nextTick -> callback 
-                        on: (event, listener) -> 
-                            if event == 'end' then listener()
-                    
-
-                session.get().then (response) -> done()
-
-
             it 'rejects with Authentication Failed 401 as response to authentication attempt', (done) -> 
 
                 session  = BasicAuth.create
@@ -229,92 +189,8 @@ describe 'BasicAuth', ->
 
         context 'auth queue', ->
 
-            xit 'pends requests while authentication is in progress', (BigBeltBuckle) -> 
+            
 
-                #throw new Error 'this test needs attention'
-
-                session  = BasicAuth.create
-                    hostname: 'localhost'
-                    username: 'morning'
-                    password: '☆'
-                    rateLimit: 2
-
-                flyWeight      = 100
-                welterWeight   = 150
-                heavyWeight    = 350
-
-                firstRequest   = true
-                authInProgress = false
-                https.request  = (opts, callback) -> 
-
-                    if firstRequest 
-                        firstRequest = false
-                        authInProgress = true
-                        return callback 
-                            #
-                            # mock response says auth required,
-                            # done immediately to case initiation of 
-                            # authentication ahead of subsequent requests
-                            # 
-                            #
-                            statusCode: 401
-                            on: (event, listener) -> 
-                                if event == 'end' then setTimeout listener, flyWeight
-                                                                                #
-                                                                                # confession, ..
-                                                                                # 
-                                                                                # * i put this here on a 'feeling' that
-                                                                                #   it would fix the broken test.
-                                                                                # * it did.
-                                                                                # * i have spent no effort on clearly
-                                                                                #   understanding why.
-                                                                                # * i am amuzed by consequencial irony 
-                                                                                #   with regards the variable name 
-                                                                                # 
-
-                    setTimeout (-> 
-
-                        callback
-                            #
-                            # mock response object that fakes 200 and emits the
-                            # inbound data stream completed event, to cause the
-                            # promises to resolve
-                            # 
-                            # it does this ALMOST immediately... to test that 
-                            # the calls were not made while the auth is in progress
-                            #
-                            statusCode: 200
-                            on: (event, listener) -> 
-                                if event == 'end' then listener()
-
-                    ), welterWeight
-
-
-                responses = {}
-                session.get(path: '/1').then  (response) -> responses.first  = response
-                session.get(path: '/2').then  (response) -> responses.second = response
-                session.get(path: '/3').then  (response) -> responses.third  = response
-
-                setTimeout (->
-
-                    # console.log before_auth_request: responses
-                    authInProgress.should.equal true
-                    should.not.exist responses.first
-                    should.not.exist responses.second
-                    should.not.exist responses.third
-
-                ), flyWeight
-
-
-                setTimeout (->
-
-                    # console.log after_auth_response: responses
-                    should.exist responses.first
-                    should.exist responses.second
-                    should.exist responses.third
-                    BigBeltBuckle()
-
-                ), heavyWeight
 
 
             xit 'queues on 401s that follow the first unauthorized response', (done) ->
@@ -505,6 +381,8 @@ describe 'BasicAuth', ->
 
             it 'dequeues at new request'
             it 'dequeues at response end'
+            it 'pends requests while authentication is in progress'
+            it 'starts an authentication on 401'
             it 'cannot queue an authentication attempt'
             it 'rejects all queued requests on authentication failure'
             it 'rejects if queue size reaches queueLimit'
