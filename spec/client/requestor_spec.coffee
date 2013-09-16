@@ -1,5 +1,12 @@
-{testable, requestor} = require '../../lib/client/requestor'
+{testable, superclass, requestor} = require '../../lib/client/requestor'
 should = require 'should'
 
-console.log requestor: requestor()
-console.log testable: testable()
+describe 'requestor', -> 
+
+    context 'request', ->
+
+        it 'posts all requests onto the queue', (done) -> 
+
+            instance = requestor()
+            testable().superclass.enqueue = done
+            instance.request()

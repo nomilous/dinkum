@@ -6,11 +6,13 @@ exports.testable = -> requestor
 
 exports.requestor = extend queue, (superclass, config) -> 
 
-    console.log superclass
-
     requestor = 
 
+        superclass: superclass # testability
+
         request: -> 
+
+            superclass.enqueue()
 
 
     return api =
