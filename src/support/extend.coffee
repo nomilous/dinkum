@@ -6,14 +6,21 @@ module.exports = (superFn, fn = {}) ->
         object[property] ||= superFn[property] for property of superFn
         return object
     
-    return -> 
+    return (args...) -> 
 
         superclass = 
             if typeof superFn isnt 'function' then superFn
-            else superFn.apply this, arguments
+            else superFn.apply this, args
         superclass ||= {}
 
-        object = fn.apply this, arguments
+        object = fn.apply this, [superclass].concat args
         object ||= {}
-        object[property] ||= superclass[property] for property of superclass
+        #
+        # TODO: perhaps make this optional by config
+        # 
+        #       it enables external access to the superclass 
+        #       properties and functions
+        #
+        #object[property] ||= superclass[property] for property of superclass
+        #
         return object

@@ -1,4 +1,16 @@
-{extend} = require '../support'
-{queue}  = require './queue'
+{extend}    = require '../support'
+{requestor} = require './requestor'
 
-exports.client = extend queue, (config) -> 
+client = undefined
+exports.testable = -> client
+
+exports.client = extend requestor, (superclass, config) -> 
+
+    client = 
+
+        get: ->
+
+
+    return api = 
+
+        get: client.get

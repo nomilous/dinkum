@@ -1,6 +1,7 @@
-{client} = require '../../lib/client/client'
+{testable, client} = require '../../lib/client/client'
 
-console.log client()
+console.log client: client()
+console.log testable()
 
 describe 'Client', ->
 
@@ -12,7 +13,7 @@ describe 'Client', ->
     context 'status', -> 
 
         context 'active', -> 
-        context 'queue', -> 
+        context 'pending', -> 
 
     context 'core methods', -> 
 

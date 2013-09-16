@@ -48,17 +48,15 @@ describe 'extend', ->
 
         SuperClass = 
             authenticate: ->
-            status: -> 'OK'
 
+        create = extend SuperClass, (superclass, tpt) -> 
 
-        create = extend SuperClass, (tpt) -> 
-            get: -> "got with #{tpt}"
-                
+            should.exist superclass.authenticate
+
+            get: -> "got with #{tpt}" 
 
         instance = create 'https'
-
         instance.get().should.equal 'got with https'
-        instance.status().should.equal 'OK'
         done()
 
 
@@ -68,36 +66,40 @@ describe 'extend', ->
 
             authenticate: -> "with #{authtype}"
 
-        createClient = extend superclass, ({transport}) -> 
+        createClient = extend superclass, (superclass, {transport}) -> 
 
-            get: -> "with #{transport}"
+            #
+            # internal access to scoped superclass
+            #
+
+            superclass.authenticate().should.equal "with BASIC"
+
+            get: -> "with #{transport} that was authenticated #{superclass.authenticate()}"
 
         instance = createClient 
 
             transport: 'https'
-            authtype:  'basic'
+            authtype:  'BASIC'
             
-        instance.get().should.equal "with https"
-        instance.authenticate().should.equal "with basic"
+        instance.get().should.equal "with https that was authenticated with BASIC"
         done()
 
 
-    it 'defaults if the factory returns null', (done) -> 
+    it 'superclass methods default to private but can be re-exposed', (done) -> 
 
-        superclass = -> function: -> 
-        create     = extend superclass, -> return null
-        instance   = create()
-        should.exist instance.function
+        superclass = ({authtype}) -> 
+
+            authenticate: -> "with #{authtype}"
+
+        createClient = extend superclass, (superclass) -> 
+
+            #
+            # optionally re-expose superclass method
+            #
+            authenticate: superclass.authenticate   
+            get: -> 
+
+
+        instance = createClient authtype: 'BASIC'
+        instance.authenticate().should.equal 'with BASIC'
         done()
-
-
-    is: it 'a', (bird) -> 
-
-        hyperclass = -> x: -> 1
-        ultraclass = extend hyperclass, -> y: -> 0
-        superclass = extend ultraclass, -> z: -> 0
-        Class      = extend superclass, -> w: -> 0
-        instance   = Class()
-        instance.x().should.equal 1
-        bird()
-
