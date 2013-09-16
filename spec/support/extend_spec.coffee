@@ -80,3 +80,14 @@ describe 'extend', ->
         instance.get().should.equal "with https"
         instance.authenticate().should.equal "with basic"
         done()
+
+
+    it 'defaults if the factory returns null', (done) -> 
+
+        superclass = -> function: -> 
+        create     = extend superclass, -> return null
+        instance   = create()
+        should.exist instance.function
+        done()
+
+

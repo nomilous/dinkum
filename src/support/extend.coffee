@@ -11,7 +11,9 @@ module.exports = (superFn, fn = {}) ->
         superclass = 
             if typeof superFn isnt 'function' then superFn
             else superFn.apply this, arguments
+        superclass ||= {}
 
         object = fn.apply this, arguments
+        object ||= {}
         object[property] ||= superclass[property] for property of superclass
         return object
