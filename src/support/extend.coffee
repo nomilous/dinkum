@@ -1,5 +1,5 @@
 module.exports = (superFn, fn = ->) -> 
     
-    fn[property] = superFn[property] for property of superFn
+    fn[property] ||= superFn[property] for property of superFn
     return fn
     

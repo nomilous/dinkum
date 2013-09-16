@@ -29,3 +29,16 @@ describe 'extend', ->
         object.status().should.equal 'OK'
         object.get().should.equal 'GOT'
         done()
+
+
+    it 'has own properties that override', (done) -> 
+
+        SuperClass = 
+            status: -> 'OK'
+
+        object = extend SuperClass, 
+            status: -> 'EXCELENT'
+
+        object.status().should.equal 'EXCELENT'
+        done()
+
