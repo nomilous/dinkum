@@ -99,3 +99,15 @@ describe 'transport', ->
         done()
 
 
+    it 'rejects on all request errors', (done) -> 
+
+        https.request = -> 
+            on: (event, listener) -> if event == 'error'
+                listener new Error "assumption"
+
+
+        instance = transport port: 3000, hostname: 'localhost'
+        instance.request { method: 'GET', path: '/' }, reject: (error) -> 
+
+            error.should.match /assumption/
+            done()

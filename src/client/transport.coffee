@@ -58,6 +58,15 @@ exports.transport = (config = {}) ->
                     action.reject()
                     return
 
+                #
+                # ASSUMPTION: all request errors mean there will be no 
+                #             usable response from the server
+                #
+
+                error.detail = requestOpts
+                result.reject error
+                action.reject()
+
 
 
 
