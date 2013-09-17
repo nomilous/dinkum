@@ -85,11 +85,9 @@ describe 'transport', ->
             error.should.match /dinkum connect timeout/
             done()
 
-    it 'set no timeout if 0', (done) -> 
+    it 'sets no timeout if 0', (done) -> 
 
-        ABORTED = false
         https.request = -> 
-            abort: -> ABORTED = true
             on: (event, listener) -> 
                 if event == 'socket'
                     listener
