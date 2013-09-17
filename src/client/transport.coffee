@@ -34,20 +34,31 @@ exports.transport = (config = {}) ->
             
             request = require( config.transport ).request requestOpts
 
+
+            request.on 'socket', (socket) -> 
+
+                unless config.connectTimeout == 0
+                    socket.setTimeout config.connectTimeout
+                    socket.on 'timeout', -> 
+                        request.abort()
+                        msg = 'dinkum connect timeout'
+                        error = new Error msg
+                        error.detail = requestOpts
+                        result.reject error
+                        action.reject()
+
             request.on 'error', (error) -> 
 
                 if error.message == 'DEPTH_ZERO_SELF_SIGNED_CERT'
-
-                    error = new Error( 
-
-                        'dinkum encounter with uncertified server (use allowUncertified to trust it)'
-
-                    )
-
-                    error.detail = config.hostname
+                    msg = 'dinkum encounter with uncertified server' 
+                    msg += ' (use allowUncertified to trust it)'
+                    error = new Error msg
+                    error.detail = requestOpts
                     result.reject error
                     action.reject()
                     return
+
+
 
 
     return api = 

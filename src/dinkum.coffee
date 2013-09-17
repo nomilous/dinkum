@@ -8,6 +8,7 @@ exports.Client =
         config.hostname        ||= 'localhost'
         config.queueLimit       ?= 100
         config.rateLimit        ?= 10
+        config.connectTimeout  ||= 0
         config.allowUncertified ?= false
         
         client config

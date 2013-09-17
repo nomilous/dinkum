@@ -61,9 +61,43 @@ describe 'transport', ->
 
             listener new Error 'DEPTH_ZERO_SELF_SIGNED_CERT'
 
-
         instance = transport port: 3000, hostname: 'localhost'
         instance.request { method: 'GET', path: '/' }, reject: (error) -> 
 
             error.should.match /use allowUncertified to trust it/
             done()
+
+
+    it 'can assign a connect timeout', (done) -> 
+
+        ABORTED = false
+        https.request = -> 
+            abort: -> ABORTED = true
+            on: (event, listener) -> 
+                if event == 'socket'
+                    listener
+                        setTimeout: (value) -> value.should.equal 20
+                        on: (event, listener) -> if event == 'timeout' then listener()
+            
+        instance = transport connectTimeout: 20
+        instance.request { method: 'GET', path: '/' }, reject: (error) -> 
+
+            error.should.match /dinkum connect timeout/
+            done()
+
+    it 'set no timeout if 0', (done) -> 
+
+        ABORTED = false
+        https.request = -> 
+            abort: -> ABORTED = true
+            on: (event, listener) -> 
+                if event == 'socket'
+                    listener
+                        setTimeout: (value) -> 
+                            throw 'should not set timeout'
+            
+        instance = transport connectTimeout: 0
+        instance.request method: 'GET', path: '/'
+        done()
+
+
