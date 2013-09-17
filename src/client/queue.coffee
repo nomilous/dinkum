@@ -25,7 +25,7 @@ exports.queue = (config = {}) ->
                 new Error 'dinkum queue overflow'
                 ) if queue.pending.count == config.queueLimit
 
-            queue.pending.items[ (++queue.sequence).toString() ] = object: object
+            queue.pending.items[ (++queue.sequence).toString() ] = object
             queue.pending.count++
             action.resolve()
 

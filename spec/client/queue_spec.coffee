@@ -15,8 +15,8 @@ describe 'queue', ->
 
                 count: 2
                 items: 
-                    '1': object: 'THING A'
-                    '2': object: 'THING B'
+                    '1': 'THING A'
+                    '2': 'THING B'
 
             done()
 
@@ -53,8 +53,8 @@ describe 'queue', ->
             testable().active.should.eql
                 count: 2
                 items: 
-                    '1': object: 'THING A'
-                    '2': object: 'THING B'
+                    '1': 'THING A'
+                    '2': 'THING B'
 
             done()
 
@@ -67,7 +67,7 @@ describe 'queue', ->
 
             instance.dequeue().then (objects) -> 
 
-                objects.should.eql [ { object: 'THING A' } ]
+                objects.should.eql [ 'THING A' ]
                 done()
 
         it 'resolves with empty array when the queue is empty', (done) ->
@@ -97,7 +97,7 @@ describe 'queue', ->
                 testable().pending.should.eql 
                     count: 1
                     items: 
-                        '5': object: 'THING E'
+                        '5': 'THING E'
                 done()
 
 
