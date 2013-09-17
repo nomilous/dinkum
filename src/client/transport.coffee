@@ -32,7 +32,32 @@ exports.transport = (config = {}) ->
             requestOpts.path     = opts.path
 
             
-            request = require( config.transport ).request requestOpts
+            request = require( config.transport ).request requestOpts, (response) -> 
+
+                resultObj = 
+                    statusCode: response.statusCode
+                    headers:    response.headers
+                    body:       ''
+
+                response.on 'data', (chunk) -> 
+
+                    #
+                    # TODO: 
+                    # - options of content type
+                    # - options for large multiparts out via notify
+                    #
+
+                    resultObj.body += chunk.toString()
+
+                response.on 'error', (error) -> 
+
+                    console.log UNHANDLED_ERROR: error
+
+
+                response.on 'end', -> 
+
+                    result.resolve resultObj
+                    action.resolve()
 
 
             request.on 'socket', (socket) -> 
@@ -68,6 +93,7 @@ exports.transport = (config = {}) ->
                 action.reject()
 
 
+            request.end()
 
 
     return api = 
