@@ -1,6 +1,7 @@
 {extend, promised} = require '../support'
-{queue}  = require './queue'
-sequence = require 'when/sequence'
+{queue}            = require './queue'
+{transport}        = require './transport'
+sequence           = require 'when/sequence'
 
 requestor = undefined
 exports.testable = -> requestor
@@ -10,6 +11,8 @@ exports.requestor = extend queue, (superclass, config = {}) ->
     requestor = 
 
         superclass: superclass # testability
+
+        transport: transport config
 
         request: promised (action, opts, result) -> 
 
@@ -41,13 +44,14 @@ exports.requestor = extend queue, (superclass, config = {}) ->
                 ([NULL, requests]) -> 
 
                     #
-                    # TODO: send all requests
+                    # * send all dequeued requests
                     #
 
-                    console.log SEND: requests
+                    console.log 
+                        SEND: requests
+                        WITH: requestor.transport
 
                     action.resolve()
-
 
                 action.reject
                 action.notify
