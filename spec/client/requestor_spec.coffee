@@ -40,17 +40,25 @@ describe 'requestor', ->
             it 'sends already pending requests before new request', (done) ->
 
                 instance = requestor()
-                testable().superclass.enqueue opts: path: '/one'
-                testable().superclass.enqueue opts: path: '/two'
+                testable().superclass.enqueue opts: { path: '/one' }, promise: 'A'
+                testable().superclass.enqueue opts: { path: '/two' }, promise: 'B'
 
-                instance.request( path: '/three' ).then -> 
+                instance.request( path: '/three', 'C' ).then -> 
 
+                    #console.log queue.testable().active.items
                     queue.testable().pending.count.should.equal 0
                     queue.testable().active.count.should.equal 3
                     queue.testable().active.items.should.eql
 
-                        '1': opts: path: '/one'
-                        '2': opts: path: '/two'
-                        '3': opts: path: '/three'
+                        '1': 
+                            opts: path: '/one'
+                            promise: 'A'
+
+                        '2': 
+                            opts: path: '/two'
+                            promise: 'B'
+                        '3': 
+                            opts: path: '/three'
+                            promise: 'C'
 
                     done()

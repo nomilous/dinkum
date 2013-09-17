@@ -13,11 +13,28 @@ exports.requestor = extend queue, (superclass, config = {}) ->
 
         superclass: superclass # testability
 
-        request: promised (action, opts = {}) -> 
+        request: promised (action, opts, result) -> 
 
             sequence([
 
-                -> superclass.enqueue opts: opts
+                #
+                # * enqueue the new request options and the 
+                #   promise of a result
+                # 
+
+                -> superclass.enqueue
+
+                        opts: opts
+                        promise: result
+                        
+                #
+                # * dequeue any previously accumulated requests 
+                #   and send those
+                # 
+                # * this dequeue may include the request that 
+                #   was just enqueued
+                #
+
                 -> superclass.dequeue()
                 
 
