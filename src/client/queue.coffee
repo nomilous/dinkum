@@ -5,9 +5,6 @@ exports.testable = -> queue
 
 exports.queue = (config = {}) -> 
 
-    config.queueLimit ?= 100
-    config.rateLimit  ?= 10
-
     queue = 
 
         sequence: 0

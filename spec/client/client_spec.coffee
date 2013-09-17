@@ -21,7 +21,9 @@ describe 'Client', ->
             it 'calls requestor.request', (done) -> 
 
                 instance = client()
-                testable().superclass.request = -> done()
+                testable().superclass.request = -> 
+                    done()
+                    then: ->
 
                 instance.get path: '/'
 
@@ -32,25 +34,20 @@ describe 'Client', ->
                 testable().superclass.request = (opts) ->
                     opts.method.should.equal 'GET'
                     done()
+                    then: ->
 
                 instance.get path: '/'
 
 
-            # it 'returns the promise that the request will be sent', (done) -> 
-            #     instance = client()
-            #     testable().superclass.request = -> return 'the promise to send request'
-            #     instance.get( path: '/' ).should.equal 'the promise to send request'
-            #     done()
-
-
-            it 'passes the result promise to the requestor', (done) -> 
+            it 'accepts an existing promise of a result and passes it to the requestor', (done) -> 
 
                 instance = client()
                 testable().superclass.request = (opts, result) -> 
-                    result.should.equal 'the promise to return a result'
+                    result.should.equal 'the deferral of a promise to return a result'
                     done()
+                    then: ->
 
-                instance.get path: '/', 'the promise to return a result'
+                instance.get path: '/', 'the deferral of a promise to return a result'
 
 
             it 'will generate a new result promise if not provided', (done) -> 
@@ -60,8 +57,29 @@ describe 'Client', ->
 
                     should.exist result.resolver
                     done()
+                    then: ->
 
                 instance.get path: '/'
+
+
+            it 'returns the result promise', (done) -> 
+
+                instance = client()
+                testable().superclass.request = (opts, result) -> then: ->
+                    
+                instance.get( path: '/', { promise: 'THE RESULT' } ).should.equal 'THE RESULT'
+                done()
+
+
+            #
+            # possibly useful
+            #
+            # it 'returns the promise that the request will be sent', (done) -> 
+            #     instance = client()
+            #     testable().superclass.request = -> return 'the promise to send request'
+            #     instance.get( path: '/' ).should.equal 'the promise to send request'
+            #     done()
+            # 
 
 
         context 'HEAD', -> 

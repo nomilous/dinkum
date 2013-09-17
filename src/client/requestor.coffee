@@ -7,8 +7,6 @@ exports.testable = -> requestor
 
 exports.requestor = extend queue, (superclass, config = {}) -> 
 
-    config.transport ||= 'https'
-
     requestor = 
 
         superclass: superclass # testability

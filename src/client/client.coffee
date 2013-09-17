@@ -14,8 +14,14 @@ exports.client = extend requestor, (superclass, config) ->
         get: (opts, result = defer()) -> 
 
             opts.method = 'GET'
+            
+            superclass.request( opts, result ).then(
+                -> 
+                result.error
+                result.notify
+            )
 
-            superclass.request opts, result
+            result.promise
 
 
     return api = 
