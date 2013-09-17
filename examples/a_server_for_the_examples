@@ -54,7 +54,9 @@ server = https.createServer
     -----END CERTIFICATE-----
     """
 
-    (req, res) => 
+    (req, res) -> 
+
+        console.log REQ: 1
 
         res.writeHead 200, {}
         res.end "BODY"

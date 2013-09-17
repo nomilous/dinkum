@@ -4,6 +4,8 @@ transport = undefined
 exports.testable = -> transport
 
 exports.transport = (config = {}) -> 
+
+    config.transport ||= 'https'
     
     transport = 
 
@@ -15,7 +17,15 @@ exports.transport = (config = {}) ->
             #   the final result promise
             #
 
-            require( config.transport ).request opts
+            requestOpts = {}
+            
+            requestOpts.port     = config.port if config.port?
+            requestOpts.hostname = config.hostname
+            
+            requestOpts.method   = opts.method
+            requestOpts.path     = opts.path
+
+            require( config.transport ).request requestOpts
 
 
     return api = 
