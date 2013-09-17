@@ -8,7 +8,7 @@ exports.client = extend requestor, (superclass, config) ->
 
     client = 
 
-        get: ->
+        get: -> 
 
 
     return api = 
