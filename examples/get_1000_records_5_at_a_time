@@ -1,1 +1,10 @@
 #!/usr/bin/env coffee
+
+{Client} = require '../lib/dinkum'
+
+client = Client.create()
+
+
+client.get( path: '/' ).then (result) -> 
+
+    console.log RESULT: result

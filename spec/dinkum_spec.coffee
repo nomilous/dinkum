@@ -3,10 +3,10 @@ should = require 'should'
 
 describe 'dinkum', -> 
 
-    it 'exports BasicAuth', -> 
+    # it 'exports BasicAuth', -> 
 
-        should.exist dinkum.client.BasicAuth
+    #     should.exist dinkum.client.BasicAuth
 
-    it 'exports CookieStore', -> 
+    # it 'exports CookieStore', -> 
 
-        should.exist dinkum.client.CookieStore
+    #     should.exist dinkum.client.CookieStore

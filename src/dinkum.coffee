@@ -1,4 +1,16 @@
-exports.client = 
+{client} = require './client/client'
 
-    CookieStore: require './client/cookie_store'
-    BasicAuth:   require './client/basic_auth'
+exports.Client = 
+
+    create: (config = {}) -> 
+
+        config.transport  ||= 'https'
+        config.hostname   ||= 'localhost'
+        config.queueLimit  ?= 100
+        config.rateLimit   ?= 10
+        
+        client config
+
+
+    # CookieStore: require './client/cookie_store'
+    # BasicAuth:   require './client/basic_auth'

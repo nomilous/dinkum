@@ -9,9 +9,13 @@ exports.client = extend requestor, (superclass, config) ->
 
     client = 
 
-        get: (opts = {}, result = defer()) -> 
+        superclass: superclass # testability
 
-            
+        get: (opts, result = defer()) -> 
+
+            opts.method = 'GET'
+
+            superclass.request opts, result
 
 
     return api = 
