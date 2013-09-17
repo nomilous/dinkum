@@ -1,6 +1,7 @@
-{testable, superclass, requestor} = require '../../lib/client/requestor'
+{testable, requestor} = require '../../lib/client/requestor'
 queue  = require '../../lib/client/queue'
 should = require 'should'
+{defer} = require 'when'
 
 describe 'requestor', -> 
 
@@ -39,26 +40,20 @@ describe 'requestor', ->
 
             it 'sends already pending requests before new request', (done) ->
 
+                A = defer()
+                B = defer()
+                C = defer()
+
                 instance = requestor()
-                testable().superclass.enqueue opts: { path: '/one' }, promise: 'A'
-                testable().superclass.enqueue opts: { path: '/two' }, promise: 'B'
+                testable().superclass.enqueue opts: { path: '/one' }, promise: A
+                testable().superclass.enqueue opts: { path: '/two' }, promise: B
 
-                instance.request( path: '/three', 'C' ).then -> 
+                testable().transport.request = (opts) -> 
 
-                    #console.log queue.testable().active.items
-                    queue.testable().pending.count.should.equal 0
-                    queue.testable().active.count.should.equal 3
-                    queue.testable().active.items.should.eql
+                    console.log opts
+                    
 
-                        '1': 
-                            opts: path: '/one'
-                            promise: 'A'
+                instance.request( path: '/three', C ).then -> 
 
-                        '2': 
-                            opts: path: '/two'
-                            promise: 'B'
-                        '3': 
-                            opts: path: '/three'
-                            promise: 'C'
+                    console.log 1
 
-                    done()

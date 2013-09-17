@@ -17,7 +17,6 @@ describe 'transport', ->
         https.request = httpsr
 
 
-
     it 'can send an http request', (done) -> 
  
         http.request = -> 

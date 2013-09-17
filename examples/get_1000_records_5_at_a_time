@@ -2,9 +2,15 @@
 
 {Client} = require '../lib/dinkum'
 
-client = Client.create()
+client = Client.create  
+
+    allowUncertified: true
+    port: 3000
 
 
-client.get( path: '/' ).then (result) -> 
+client.get( path: '/' ).then( 
 
-    console.log RESULT: result
+    (result) -> console.log RESULT: result
+    (error)  -> console.log ERROR:  error
+
+)

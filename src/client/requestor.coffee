@@ -2,6 +2,7 @@
 {queue}            = require './queue'
 {transport}        = require './transport'
 sequence           = require 'when/sequence'
+parallel           = require 'when/parallel'
 
 requestor = undefined
 exports.testable = -> requestor
@@ -15,6 +16,8 @@ exports.requestor = extend queue, (superclass, config = {}) ->
         transport: transport config
 
         request: promised (action, opts, result) -> 
+
+            {resolve, reject, notify} = action
 
             sequence([
 
@@ -47,14 +50,17 @@ exports.requestor = extend queue, (superclass, config = {}) ->
                     # * send all dequeued requests
                     #
 
-                    console.log 
-                        SEND: requests
-                        WITH: requestor.transport
+                    parallel( for request in requests
 
-                    action.resolve()
+                        do (request) -> 
 
-                action.reject
-                action.notify
+                            {opts, promise} = request
+                            -> requestor.transport.request opts, promise
+
+                    ).then resolve, reject, notify
+
+                reject
+                notify
 
             )
 

@@ -62,8 +62,7 @@ server = https.createServer
         console.log url:     req.url
 
         res.writeHead 200, {}
-        res.end "BODY"
-
+        res.end ''
 
 
 
