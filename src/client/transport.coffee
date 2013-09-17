@@ -6,6 +6,12 @@ exports.testable = -> transport
 exports.transport = (config = {}) -> 
 
     config.transport ||= 'https'
+
+    if config.transport == 'https' 
+
+        options = require('https').globalAgent.options
+        options.rejectUnauthorized = not config.allowUncertified
+        
     
     transport = 
 
@@ -18,14 +24,30 @@ exports.transport = (config = {}) ->
             #
 
             requestOpts = {}
-            
+
             requestOpts.port     = config.port if config.port?
             requestOpts.hostname = config.hostname
             
             requestOpts.method   = opts.method
             requestOpts.path     = opts.path
 
-            require( config.transport ).request requestOpts
+            
+            request = require( config.transport ).request requestOpts
+
+            request.on 'error', (error) -> 
+
+                if error.message == 'DEPTH_ZERO_SELF_SIGNED_CERT'
+
+                    error = new Error( 
+
+                        'dinkum encounter with uncertified server (use allowUncertified to trust it)'
+
+                    )
+
+                    error.detail = config.hostname
+                    result.reject error
+                    action.reject()
+                    return
 
 
     return api = 

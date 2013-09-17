@@ -4,10 +4,11 @@ exports.Client =
 
     create: (config = {}) -> 
 
-        config.transport  ||= 'https'
-        config.hostname   ||= 'localhost'
-        config.queueLimit  ?= 100
-        config.rateLimit   ?= 10
+        config.transport       ||= 'https'
+        config.hostname        ||= 'localhost'
+        config.queueLimit       ?= 100
+        config.rateLimit        ?= 10
+        config.allowUncertified ?= false
         
         client config
 
