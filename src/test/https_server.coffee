@@ -9,8 +9,11 @@ module.exports = HttpsServer =
         # access to most recent received requests
         # 
 
-        latest: -> HttpsServer.server.requests[0]
+        received: -> HttpsServer.server.requests[0]
         requests: []
+
+        setResponse: (response) -> HttpsServer.server.responses.push response
+        responses: [] 
 
 
     start: (opts, callback) -> 
@@ -76,8 +79,13 @@ module.exports = HttpsServer =
                 while HttpsServer.server.requests.length > opts.keep
                     HttpsServer.server.requests.pop()
 
-                res.writeHead 200, {}
-                res.end ''
+                response = HttpsServer.server.responses.shift()
+
+                res.writeHead( 
+                    response.statusCode || 200
+                    response.headers    || {}
+                )
+                res.end response.body   || ''
 
 
 

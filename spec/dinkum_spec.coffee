@@ -4,7 +4,7 @@ should = require 'should'
 
 describe 'dinkum', -> 
     
-    before (done) -> start port: 3000, keep: 1, done
+    before (done) -> start port: 3000, done
     after (done) -> stop done
 
 
@@ -15,10 +15,20 @@ describe 'dinkum', ->
             port: 3000
             allowUncertified: true
 
-        
-        client.get( path: '/get/this/thing' ).then -> 
 
-            server.latest().method.should.equal 'GET'
-            server.latest().url.should.equal '/get/this/thing'
+        server.setResponse
+
+            statusCode: 401
+            headers: 'set-cookie': ['SESSION=xxxxxx;']
+
+
+        client.get( path: '/login' ).then (response) ->
+
+            server.received().method.should.equal 'GET'
+            server.received().url.should.equal '/login'
+
+            response.headers['set-cookie'].should.eql ['SESSION=xxxxxx;']
+            response.statusCode.should.equal 401
+
             done()
 
