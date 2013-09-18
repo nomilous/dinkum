@@ -1,14 +1,14 @@
 should = require 'should'
 {Client, Test} = require '../lib/dinkum'
-{start,  stop} = Test.HttpsServer
+{start, stop, server} = Test.HttpsServer
 
 describe 'dinkum', -> 
     
-    before (done) -> start 3000, done
+    before (done) -> start port: 3000, keep: 1, done
     after (done) -> stop done
 
 
-    it 'requests from the server', (done) -> 
+    it 'sends GET request to server', (done) -> 
 
         client = Client.create
 
@@ -16,8 +16,9 @@ describe 'dinkum', ->
             allowUncertified: true
 
         
-        client.get( path: '/' ).then (r) -> 
+        client.get( path: '/get/this/thing' ).then -> 
 
-            console.log r
+            server.latest().method.should.equal 'GET'
+            server.latest().url.should.equal '/get/this/thing'
             done()
 

@@ -1,9 +1,21 @@
-https  = require 'https'
-server = undefined
+https    = require 'https'
+server   = undefined
 
-module.exports = 
+module.exports = HttpsServer =
 
-    start: (port, callback) -> 
+    server: 
+
+        #
+        # access to most recent received requests
+        # 
+
+        latest: -> HttpsServer.server.requests[0]
+        requests: []
+
+
+    start: (opts, callback) -> 
+
+        opts.keep ||= 10
 
         server = https.createServer
 
@@ -60,17 +72,16 @@ module.exports =
 
             (req, res) -> 
 
-                console.log '\nrequest:'
-                console.log headers: req.headers
-                console.log method:  req.method
-                console.log url:     req.url
+                HttpsServer.server.requests.unshift req
+                while HttpsServer.server.requests.length > opts.keep
+                    HttpsServer.server.requests.pop()
 
                 res.writeHead 200, {}
                 res.end ''
 
 
 
-        server.listen port, callback
+        server.listen opts.port, callback
 
 
     stop: (callback) -> server.close callback
