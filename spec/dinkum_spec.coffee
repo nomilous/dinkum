@@ -1,12 +1,23 @@
-dinkum = require '../lib/dinkum'
 should = require 'should'
+{Client, Test} = require '../lib/dinkum'
+{start,  stop} = Test.HttpsServer
 
 describe 'dinkum', -> 
+    
+    before (done) -> start 3000, done
+    after (done) -> stop done
 
-    # it 'exports BasicAuth', -> 
 
-    #     should.exist dinkum.client.BasicAuth
+    it 'requests from the server', (done) -> 
 
-    # it 'exports CookieStore', -> 
+        client = Client.create
 
-    #     should.exist dinkum.client.CookieStore
+            port: 3000
+            allowUncertified: true
+
+        
+        client.get( path: '/' ).then (r) -> 
+
+            console.log r
+            done()
+
