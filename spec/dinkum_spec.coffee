@@ -16,10 +16,9 @@ describe 'dinkum', ->
             allowUncertified: true
 
 
-        server.setResponse
-
-            statusCode: 401
-            headers: 'set-cookie': ['SESSION=xxxxxx;']
+        # server.setResponse
+        #     statusCode: 401
+        #     headers: 'set-cookie': ['SESSION=xxxxxx;']
 
 
         client.get( path: '/login' ).then (response) ->
@@ -27,8 +26,8 @@ describe 'dinkum', ->
             server.received().method.should.equal 'GET'
             server.received().url.should.equal '/login'
 
-            response.headers['set-cookie'].should.eql ['SESSION=xxxxxx;']
-            response.statusCode.should.equal 401
+            # response.headers['set-cookie'].should.eql ['SESSION=xxxxxx;']
+            # response.statusCode.should.equal 401
 
             done()
 

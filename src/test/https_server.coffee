@@ -79,7 +79,7 @@ module.exports = HttpsServer =
                 while HttpsServer.server.requests.length > opts.keep
                     HttpsServer.server.requests.pop()
 
-                response = HttpsServer.server.responses.shift()
+                response = HttpsServer.server.responses.shift() || {}
 
                 res.writeHead( 
                     response.statusCode || 200
