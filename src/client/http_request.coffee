@@ -3,7 +3,10 @@ module.exports = class HttpReuquest
     constructor: (@promised, @opts) -> 
 
         sequence = undefined
-        state    = value: 'pending'
+        local =
+            state: 
+                value: 'pending'
+                at: Date.now()
 
         Object.defineProperty this, 'sequence', 
             enumerable: true
@@ -15,5 +18,12 @@ module.exports = class HttpReuquest
 
         Object.defineProperty this, 'state', 
             enumerable: true
-            get: -> state.value
+            get: -> local.state.value
+            set: (value) -> 
+                local.state.value = value
+                local.state.at = Date.now()
+
+        Object.defineProperty this, 'stateAt', 
+            enumerable: true
+            get: -> local.state.at
 
