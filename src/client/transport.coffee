@@ -48,6 +48,7 @@ exports.transport = (config) ->
                     # TODO: 
                     # - options of content type
                     # - options for large multiparts out via notify
+                    # - progress ( content-length - accumulated buffer)
                     #
 
                     httpRequest.state = 'receive'
