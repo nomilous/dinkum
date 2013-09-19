@@ -23,3 +23,10 @@ describe 'HttpRequest', ->
         r.sequence.should.equal 1
         done()
 
+
+    it 'has state initially pending', (done) -> 
+
+        r = new HttpRequest 'PROMISED', path: '/'
+        r.state.should.equal 'pending'
+        done()
+
