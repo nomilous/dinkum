@@ -56,7 +56,7 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
                         # https://github.com/nomilous/knowledge/blob/master/spec/promise/loops.coffee#L74
                         #
 
-                        do (request) -> -> requestor.transport.request httpRequest
+                        do (httpRequest) -> -> requestor.transport.request httpRequest
 
                     ).then resolve, reject, notify
 

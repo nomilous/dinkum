@@ -4,7 +4,7 @@ should = require 'should'
 
 describe 'dinkum', -> 
     
-    before (done) -> start port: 3000, done
+    before (done) -> start port: 3001, done
     after (done) -> stop done
 
 
@@ -12,7 +12,7 @@ describe 'dinkum', ->
 
         client = Client.create
 
-            port: 3000
+            port: 3001
             allowUncertified: true
 
 

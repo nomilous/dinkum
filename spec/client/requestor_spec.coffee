@@ -42,27 +42,20 @@ describe 'requestor', ->
 
             it 'dequeues already pending requests before new ones', (done) ->
 
-                # A = defer()
-                # B = defer()
-                # C = defer()
-
                 instance = requestor()
                 testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/one'
                 testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/two'
 
-                testable().transport.request = (request) -> 
-
-                            console.log RRRR: request
-                            request 
+                testable().transport.request = (request) -> return request 
                             #
-                            # 
+                            #
                             # stub transport to respond with the unsent HttpRequest
                             # so that the next request's dequeue resolves with the
                             # the 3 dequeued HttpRequests
-                            #   
+                            # 
                             # 
                 instance.request( path: '/three', 'PROMISED' ).then (transportResults) -> 
-
+                    
                     transportResults.map( 
 
                         (r) -> 
