@@ -1,15 +1,15 @@
-{extend, deferred} = require '../support'
+{enclose, deferred} = require '../support'
 {queue}            = require './queue'
-{transport}        = require './transport'
-HttpRequest        = require './http_request'
-sequence           = require 'when/sequence'
-parallel           = require 'when/parallel'
+{transport}       = require './transport'
+HttpRequest      = require './http_request'
+sequence        = require 'when/sequence'
+parallel       = require 'when/parallel'
 
 count = 0
 requestor = undefined
 exports.testable = -> requestor
 
-exports.requestor = extend queue, (superclass, config = {}) -> 
+exports.requestor = enclose queue, (superclass, config = {}) -> 
 
     requestor = 
 

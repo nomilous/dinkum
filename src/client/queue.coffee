@@ -1,4 +1,4 @@
-{extend, deferred} = require '../support'
+{deferred} = require '../support'
 
 queue = undefined
 exports.testable = -> queue

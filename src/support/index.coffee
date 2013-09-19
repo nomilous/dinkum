@@ -1,2 +1,2 @@
-exports.extend   = require './extend'
+exports.enclose  = require './enclose'
 exports.deferred = require './deferred'

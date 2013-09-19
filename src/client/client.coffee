@@ -1,11 +1,11 @@
-{extend}    = require '../support'
+{enclose}   = require '../support'
 {defer}     = require 'when'
 {requestor} = require './requestor'
 
 client = undefined
 exports.testable = -> client
 
-exports.client = extend requestor, (superclass, config) -> 
+exports.client = enclose requestor, (superclass, config) -> 
 
     client = 
 
