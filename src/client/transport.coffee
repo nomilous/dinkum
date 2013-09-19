@@ -48,7 +48,7 @@ exports.transport = (config) ->
                     # TODO: 
                     # - options of content type
                     # - options for large multiparts out via notify
-                    # - progress ( content-length - accumulated buffer)
+                    # - progress ( content-length - accumulated chunk sum )
                     #
 
                     httpRequest.state = 'receive'
@@ -58,19 +58,20 @@ exports.transport = (config) ->
 
                     #
                     # #ERROR  dunno when / if this ever happens
-                    #
+                    # #DONE
+                    # 
 
                     console.log UNHANDLED_ERROR: error
 
 
                 response.on 'end', -> 
 
-                    #
-                    # TODO: move from active to done here
-                    #
+                    # 
+                    # * completed / closed inbound socket 
+                    # 
 
                     promised.resolve resultObj
-                    httpRequest.state = 'done'
+                    httpRequest.state = 'done'  #DONE
                     action.resolve()
 
 
@@ -91,7 +92,7 @@ exports.transport = (config) ->
                         # Pending retry ability later...
                         #
 
-                        httpRequest.state = 'done'   #ERROR
+                        httpRequest.state = 'done'   #ERROR #DONE
                         httpRequest.error = error
                         promised.reject error
                         action.reject()
@@ -103,7 +104,7 @@ exports.transport = (config) ->
                     msg += ' (use allowUncertified to trust it)'
                     error = new Error msg
                     error.detail = requestOpts
-                    httpRequest.state = 'done'   #ERROR
+                    httpRequest.state = 'done'   #ERROR #DONE
                     httpRequest.error = error
                     promised.reject error
                     action.reject()

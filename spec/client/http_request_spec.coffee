@@ -49,3 +49,16 @@ describe 'HttpRequest', ->
         r.stateAt.should.equal 12345
         r.state.should.equal 'request'
         done()
+
+
+    it 'can call a function on state transition to done', (done) -> 
+
+        r = new HttpRequest 'PROMISED', path: '/'
+        r.error = new Error 'darnit'
+        r.onDone = (error, request) -> 
+
+            error.should.match /darnit/
+            request.should.equal r
+            done()
+
+        r.state = 'done'
