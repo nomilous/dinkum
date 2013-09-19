@@ -7,7 +7,7 @@ exports.Client =
         config.transport       ||= 'https'
         config.hostname        ||= 'localhost'
         config.queueLimit       ?= 100
-        config.rateLimit        ?= 10
+        config.requestLimit     ?= 10
         config.connectTimeout  ||= 0
         config.allowUncertified ?= false
         
@@ -19,3 +19,5 @@ exports.Client =
 
 
 exports.Test = require './test'
+
+exports.promised = require './support/promised'

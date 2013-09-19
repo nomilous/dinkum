@@ -202,7 +202,7 @@ describe 'BasicAuth', ->
                     hostname: 'localhost'
                     username: 'morning'
                     password: '☆'
-                    rateLimit: 3
+                    requestLimit: 3
 
                 #
                 # client could start more than one activity in parallel
@@ -299,7 +299,7 @@ describe 'BasicAuth', ->
                     hostname: 'localhost'
                     username: 'morning'
                     password: '☆'
-                    rateLimit: 2
+                    requestLimit: 2
 
                 https.request = (opts, callback) -> 
 
@@ -333,7 +333,7 @@ describe 'BasicAuth', ->
                     hostname: 'localhost'
                     username: 'morning'
                     password: '☆'
-                    rateLimit: 1
+                    requestLimit: 1
 
                 responses = []
                 session.get(path: '/one').then   (r) -> 

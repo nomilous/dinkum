@@ -1,0 +1,51 @@
+#!/usr/bin/env coffee
+
+{Client} = require '../lib/dinkum'
+pipeline = require 'when/pipeline'
+parallel = require 'when/parallel'
+
+client1 = Client.create  
+
+    allowUncertified: true
+    hostname: 'localhost'
+    port: 3000
+
+client2 = Client.create
+    
+    queueLimit: 100000
+    requestLimit: 10
+    allowUncertified: true
+    hostname: 'localhost'
+    port: 3000
+
+
+pipeline( [
+
+    (      ) -> client1.get path: '/get/100000/records'
+    (result) -> 
+
+        console.log "#{result.body[0..50]}..."
+        data = JSON.parse result.body
+        
+        parallel( for record in data.records
+
+            do (record) -> 
+
+                # -> client2.post path: '/update', json: record
+                -> client2.get path: '/post/update/' + record.id
+            
+        )
+
+
+] ).then( 
+    
+    (result) -> 
+
+        console.log done: result
+
+    (error) -> 
+
+        console.log ERROR: error
+
+)
+

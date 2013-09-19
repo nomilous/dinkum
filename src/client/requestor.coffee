@@ -4,6 +4,7 @@
 sequence           = require 'when/sequence'
 parallel           = require 'when/parallel'
 
+count = 0
 requestor = undefined
 exports.testable = -> requestor
 
@@ -50,12 +51,15 @@ exports.requestor = extend queue, (superclass, config = {}) ->
                     # * send all dequeued requests
                     #
 
+                    console.log 
+                        PROCESS: requests
+                        COUNT: count++
+
                     parallel( for request in requests
 
                         do (request) -> 
 
-                            {opts, promise} = request
-                            -> requestor.transport.request opts, promise
+                            -> requestor.transport.request request.opts, request.sequence, request.promise
 
                     ).then resolve, reject, notify
 

@@ -3,20 +3,20 @@ should = require 'should'
 
 describe 'queue', -> 
 
-    context 'enqueue', -> 
+    xcontext 'enqueue', -> 
 
         it 'sequences objects onto the pending queue', (done) -> 
 
             instance = queue()
-            instance.enqueue 'THING A'
-            instance.enqueue 'THING B'
+            instance.enqueue thing: 'A'
+            instance.enqueue thing: 'B'
 
             testable().pending.should.eql 
 
                 count: 2
                 items: 
-                    '1': 'THING A'
-                    '2': 'THING B'
+                    '1': thing: 'A', sequence: 1
+                    '2': thing: 'B', sequence: 2
 
             done()
 
@@ -31,8 +31,8 @@ describe 'queue', ->
 
                 queueLimit: 1
 
-            instance.enqueue 'THING A'
-            instance.enqueue('THING B').then (->), (error) -> 
+            instance.enqueue thing: 'A'
+            instance.enqueue( thing: 'B' ).then (->), (error) -> 
 
                 error.message.should.equal 'dinkum queue overflow'
                 done()
@@ -43,20 +43,22 @@ describe 'queue', ->
         it 'transfers items onto the active queue', (done) -> 
 
             instance = queue()
-            instance.enqueue 'THING A'
-            instance.enqueue 'THING B'
-            instance.dequeue() 
+            instance.enqueue thing: 'A'
+            instance.enqueue thing: 'B'
+            instance.dequeue()
 
-            testable().pending.should.eql 
-                count: 0
-                items: {}
-            testable().active.should.eql
-                count: 2
-                items: 
-                    '1': 'THING A'
-                    '2': 'THING B'
+            process.nextTick ->
 
-            done()
+                testable().pending.should.eql 
+                    count: 0
+                    items: {}
+                testable().active.should.eql
+                    count: 2
+                    items: 
+                        '1': thing: 'A', sequence: 1
+                        '2': thing: 'B', sequence: 2
+
+                done()
 
 
         it 'resolves with the array of dequeued objects', (done) -> 
@@ -79,15 +81,15 @@ describe 'queue', ->
                 done()
 
 
-        it 'rateLimits dequeue according to the number of objects on the active queue', (done) -> 
+        it 'requestLimit dequeue according to the number of objects on the active queue', (done) -> 
 
-            instance = queue rateLimit: 4
+            instance = queue requestLimit: 4
                 
-            instance.enqueue 'THING A'
-            instance.enqueue 'THING B'
-            instance.enqueue 'THING C'
-            instance.enqueue 'THING D'
-            instance.enqueue 'THING E'
+            instance.enqueue thing: 'A'
+            instance.enqueue thing: 'B'
+            instance.enqueue thing: 'C'
+            instance.enqueue thing: 'D'
+            instance.enqueue thing: 'E'
 
             instance.dequeue().then (objects) -> 
 
@@ -97,7 +99,7 @@ describe 'queue', ->
                 testable().pending.should.eql 
                     count: 1
                     items: 
-                        '5': 'THING E'
+                        '5': thing: 'E', sequence: 5
                 done()
 
 
@@ -108,18 +110,19 @@ describe 'queue', ->
             instance = queue
 
                 queueLimit: 1000
-                rateLimit:  100
+                requestLimit:  100
 
-            instance.enqueue 'THING' for i in [0..9999]
+            instance.enqueue {thing: i} for i in [0..9999]
             instance.dequeue()
-            instance.queue.stats().then (stats) -> 
 
-                stats.should.eql
+            process.nextTick -> 
+                instance.queue.stats().then (stats) -> 
+                    stats.should.eql
 
-                    pending: count: 900
-                    active:  count: 100
+                        pending: count: 900
+                        active:  count: 100
 
-                done()
+                    done()
 
 
 

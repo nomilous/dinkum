@@ -56,14 +56,24 @@ server = https.createServer
 
     (req, res) -> 
 
-        console.log '\nrequest:'
-        console.log headers: req.headers
-        console.log method:  req.method
-        console.log url:     req.url
 
-        res.writeHead 200, {}
-        res.end ''
+        console.log req.url
+        
 
+        if req.url == '/get/100000/records'
+
+            res.writeHead 200, {}
+            res.end JSON.stringify records: (
+                for i in [0..19]
+                    id: i
+            )
+            return
+
+        setTimeout (->
+            res.writeHead 200, {}
+            res.end 'records: []'
+
+        ), 1000
 
 
 server.listen 3000, ->

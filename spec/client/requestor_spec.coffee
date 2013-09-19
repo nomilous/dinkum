@@ -38,7 +38,7 @@ describe 'requestor', ->
 
         context 'dequeue', (done) -> 
 
-            it 'sends already pending requests before new request', (done) ->
+            xit 'sends already pending requests before new request', (done) ->
 
                 A = defer()
                 B = defer()

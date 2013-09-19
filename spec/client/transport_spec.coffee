@@ -25,7 +25,7 @@ describe 'transport', ->
             on: ->
 
         instance = transport transport: 'http'
-        instance.request()
+        instance.request path: '/'
 
     it 'can send an https request', (done) -> 
 
@@ -34,25 +34,26 @@ describe 'transport', ->
             end: ->
             on: ->
         instance = transport transport: 'https'
-        instance.request()
+        instance.request path: '/', 1
 
 
     it 'assigns hostname, port from config', (done) -> 
 
         https.request = (opts) -> 
+
             opts.hostname.should.equal 'localhost'
             opts.port.should.equal 3000
             done()
             end: ->
             on: ->
 
-        instance = transport port: 3000, hostname: 'localhost'
-        instance.request()
+        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance.request path: '/', 1
 
 
     it 'assigns method, path from opts', (done) -> 
 
-        instance = transport port: 3000, hostname: 'localhost'
+        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
         https.request = (opts) -> 
             opts.method.should.equal 'GET'
             opts.path.should.equal '/'
@@ -60,7 +61,7 @@ describe 'transport', ->
             end: ->
             on: ->
 
-        instance.request method: 'GET', path: '/'
+        instance.request method: 'GET', path: '/', 1
 
 
     it 'suggests how to deal with DEPTH_ZERO_SELF_SIGNED_CERT', (done) -> 
@@ -70,8 +71,8 @@ describe 'transport', ->
             on: (event, listener) -> if event == 'error'
                 listener new Error 'DEPTH_ZERO_SELF_SIGNED_CERT'
 
-        instance = transport port: 3000, hostname: 'localhost'
-        instance.request { method: 'GET', path: '/' }, reject: (error) -> 
+        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance.request { method: 'GET', path: '/' }, 1, reject: (error) -> 
 
             error.should.match /use allowUncertified to trust it/
             done()
@@ -89,8 +90,8 @@ describe 'transport', ->
                         setTimeout: (value) -> value.should.equal 20
                         on: (event, listener) -> if event == 'timeout' then listener()
             
-        instance = transport connectTimeout: 20
-        instance.request { method: 'GET', path: '/' }, reject: (error) -> 
+        instance = transport transport: 'https', connectTimeout: 20
+        instance.request { method: 'GET', path: '/' }, 1, reject: (error) -> 
 
             error.should.match /dinkum connect timeout/
             done()
@@ -106,7 +107,7 @@ describe 'transport', ->
                         setTimeout: (value) -> 
                             throw 'should not set timeout'
             
-        instance = transport connectTimeout: 0
+        instance = transport transport: 'https', connectTimeout: 0
         instance.request method: 'GET', path: '/'
         done()
 
@@ -119,8 +120,8 @@ describe 'transport', ->
                 listener new Error "assumption"
 
 
-        instance = transport port: 3000, hostname: 'localhost'
-        instance.request { method: 'GET', path: '/' }, reject: (error) -> 
+        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance.request { method: 'GET', path: '/' }, 1, reject: (error) -> 
 
             error.should.match /assumption/
             done()
@@ -128,7 +129,7 @@ describe 'transport', ->
 
     it 'accumulates body as string and resolves including header and status code', (done) ->
 
-        instance = transport port: 3000, hostname: 'localhost'
+        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
         https.request = (opts, callback) -> 
             callback
                 headers:    'HEADERS'
@@ -141,7 +142,7 @@ describe 'transport', ->
             on: -> 
             end: ->
 
-        instance.request { method: 'GET', path: '/' }, resolve: (result) -> 
+        instance.request { method: 'GET', path: '/' }, 1, resolve: (result) -> 
 
                 result.should.eql 
                     statusCode: 'STATUSCODE'

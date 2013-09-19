@@ -22,27 +22,32 @@ exports.queue = (config = {}) ->
                 new Error 'dinkum queue overflow'
                 ) if queue.pending.count == config.queueLimit
 
-            queue.pending.items[ (++queue.sequence).toString() ] = object
+
+            object.sequence = ++queue.sequence
+
+            queue.pending.items[ (queue.sequence).toString() ] = object
             queue.pending.count++
             action.resolve()
 
 
         dequeue: promised (action) -> 
 
-            slots = config.rateLimit - queue.active.count
-            action.resolve( 
+            process.nextTick -> 
 
-                for seq of queue.pending.items
+                slots = config.requestLimit - queue.active.count
+                action.resolve( 
 
-                    break if --slots < 0
+                    for seq of queue.pending.items
 
-                    object = queue.pending.items[seq]
-                    queue.active.items[seq] = object
-                    delete queue.pending.items[seq]
-                    queue.active.count++
-                    queue.pending.count--
-                    object
-            )
+                        break if --slots < 0
+
+                        object = queue.pending.items[seq]
+                        queue.active.items[seq] = object
+                        delete queue.pending.items[seq]
+                        queue.active.count++
+                        queue.pending.count--
+                        object
+                )
         
 
         queue: stats: promised (action) ->

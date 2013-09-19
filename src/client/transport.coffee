@@ -3,9 +3,7 @@
 transport = undefined
 exports.testable = -> transport
 
-exports.transport = (config = {}) -> 
-
-    config.transport ||= 'https'
+exports.transport = (config) -> 
 
     if config.transport == 'https' 
 
@@ -15,13 +13,15 @@ exports.transport = (config = {}) ->
     
     transport = 
 
-        request: promised (action, opts = {}, result) -> 
+        request: promised (action, opts, sequence, result) -> 
 
             #
             # * request has local promise to allow for reposting
             #   on authentication failure without affecting the
             #   the final result promise
             #
+
+            console.log requesting: sequence
 
             requestOpts = {}
 
@@ -33,6 +33,8 @@ exports.transport = (config = {}) ->
 
             
             request = require( config.transport ).request requestOpts, (response) -> 
+
+                console.log connected: sequence
 
                 resultObj = 
                     statusCode: response.statusCode
@@ -47,6 +49,8 @@ exports.transport = (config = {}) ->
                     # - options for large multiparts out via notify
                     #
 
+                    console.log receiving: sequence
+
                     resultObj.body += chunk.toString()
 
                 response.on 'error', (error) -> 
@@ -55,6 +59,12 @@ exports.transport = (config = {}) ->
 
 
                 response.on 'end', -> 
+
+                    #
+                    # TODO: move from active to done here
+                    #
+
+                    console.log done: sequence
 
                     result.resolve resultObj
                     action.resolve()

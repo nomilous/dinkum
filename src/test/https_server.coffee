@@ -7,10 +7,21 @@ module.exports = HttpsServer =
 
         #
         # access to most recent received requests
+        # ---------------------------------------
+        # 
+        # * most recent at server.requests[0]
+        # * opts.keep history length
         # 
 
         received: -> HttpsServer.server.requests[0]
         requests: []
+
+        #
+        # preload a sequence of server responses
+        # --------------------------------------
+        # 
+        # * responds to client in created order (fifo)
+        #
 
         setResponse: (response) -> HttpsServer.server.responses.push response
         responses: [] 
