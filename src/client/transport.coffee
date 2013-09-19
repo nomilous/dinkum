@@ -17,7 +17,7 @@ exports.transport = (config) ->
 
             #
             # * request has local promise (action) to allow for re reposting 
-            #   on authentication failure without affecting the the final 
+            #   on authentication failure without affecting the the thefinal 
             #   result promise
             # 
 
