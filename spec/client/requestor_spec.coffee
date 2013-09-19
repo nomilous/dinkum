@@ -1,5 +1,6 @@
 {testable, requestor} = require '../../lib/client/requestor'
 queue  = require '../../lib/client/queue'
+HttpRequest = require '../../lib/client/http_request'
 should = require 'should'
 {defer} = require 'when'
 
@@ -9,10 +10,11 @@ describe 'requestor', ->
 
         context 'enqueue', ->
 
-            it 'enqueues all new requests', (done) -> 
+            it 'creates and enqueues all new HttpRequests', (done) -> 
 
                 instance = requestor()
-                testable().superclass.enqueue = ->
+                testable().superclass.enqueue = (object) ->
+                    object.should.be.an.instanceof HttpRequest
                     done()
                     then: ->
 
@@ -38,22 +40,38 @@ describe 'requestor', ->
 
         context 'dequeue', (done) -> 
 
-            xit 'sends already pending requests before new request', (done) ->
+            it 'dequeues already pending requests before new ones', (done) ->
 
-                A = defer()
-                B = defer()
-                C = defer()
+                # A = defer()
+                # B = defer()
+                # C = defer()
 
                 instance = requestor()
-                testable().superclass.enqueue opts: { path: '/one' }, promise: A
-                testable().superclass.enqueue opts: { path: '/two' }, promise: B
+                testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/one'
+                testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/two'
 
-                testable().transport.request = (opts) -> 
+                testable().transport.request = (request) -> request 
+                            #
+                            # 
+                            # stub transport to respond with the unsent HttpRequest
+                            # so that the next request's dequeue resolves with the
+                            # the 3 dequeued HttpRequests
+                            #   
+                            # 
+                instance.request( path: '/three', 'PROMISED' ).then (transportResults) -> 
 
-                    console.log opts
-                    
+                    transportResults.map( 
 
-                instance.request( path: '/three', C ).then -> 
+                        (r) -> 
 
-                    console.log 1
+                            seq: r.sequence
+                            path: r.opts.path
+
+                    ).should.eql [ 
+                        { seq: 1, path: '/one'   }
+                        { seq: 2, path: '/two'   }
+                        { seq: 3, path: '/three' } 
+                    ]
+
+                    done()
 

@@ -3,12 +3,6 @@ HttpRequest = require '../../lib/client/http_request'
 
 describe 'HttpRequest', -> 
 
-    it 'is assigned a sequence number', (done) -> 
-
-        r = new HttpRequest {}, path: '/'
-        r.sequence.should.equal 1
-        done()
-
     it 'stores the request opts', (done) -> 
 
         r = new HttpRequest {}, path: '/'
@@ -19,5 +13,13 @@ describe 'HttpRequest', ->
 
         r = new HttpRequest 'PROMISED', path: '/'
         r.deferral.should.equal 'PROMISED'
+        done()
+
+    it 'can have sequence number assigned only once', (done) ->
+
+        r = new HttpRequest 'PROMISED', path: '/'
+        r.sequence = 1
+        r.sequence = 2
+        r.sequence.should.equal 1
         done()
 

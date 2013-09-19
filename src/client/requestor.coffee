@@ -1,6 +1,7 @@
 {extend, promised} = require '../support'
 {queue}            = require './queue'
 {transport}        = require './transport'
+HttpRequest        = require './http_request'
 sequence           = require 'when/sequence'
 parallel           = require 'when/parallel'
 
@@ -16,21 +17,18 @@ exports.requestor = extend queue, (superclass, config = {}) ->
 
         transport: transport config
 
-        request: promised (action, opts, result) -> 
+        request: promised (action, opts, deferral) -> 
 
             {resolve, reject, notify} = action
 
             sequence([
 
                 #
-                # * enqueue the new request options and the 
-                #   promise of a result
+                # * enqueue the new HttpRequest with options and the 
+                #   deferral of promised result
                 # 
 
-                -> superclass.enqueue
-
-                        opts: opts
-                        promise: result
+                -> superclass.enqueue new HttpRequest deferral, opts
                         
                 #
                 # * dequeue any previously accumulated requests 
@@ -51,15 +49,9 @@ exports.requestor = extend queue, (superclass, config = {}) ->
                     # * send all dequeued requests
                     #
 
-                    console.log 
-                        PROCESS: requests
-                        COUNT: count++
-
                     parallel( for request in requests
 
-                        do (request) -> 
-
-                            -> requestor.transport.request request.opts, request.sequence, request.promise
+                        do (request) -> -> requestor.transport.request request
 
                     ).then resolve, reject, notify
 
