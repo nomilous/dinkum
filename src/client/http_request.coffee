@@ -1,6 +1,6 @@
 module.exports = class HttpReuquest
 
-    constructor: (@deferral, @opts) -> 
+    constructor: (@promised, @opts) -> 
 
         sequence = undefined
         Object.defineProperty this, 'sequence', 

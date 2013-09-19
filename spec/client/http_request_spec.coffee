@@ -12,7 +12,7 @@ describe 'HttpRequest', ->
     it 'stores the request deferral', (done) -> 
 
         r = new HttpRequest 'PROMISED', path: '/'
-        r.deferral.should.equal 'PROMISED'
+        r.promised.should.equal 'PROMISED'
         done()
 
     it 'can have sequence number assigned only once', (done) ->

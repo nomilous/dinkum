@@ -49,9 +49,9 @@ exports.requestor = extend queue, (superclass, config = {}) ->
                     # * send all dequeued requests
                     #
 
-                    parallel( for request in requests
+                    parallel( for httpRequest in requests
 
-                        do (request) -> -> requestor.transport.request request
+                        do (request) -> -> requestor.transport.request httpRequest
 
                     ).then resolve, reject, notify
 

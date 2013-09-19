@@ -13,13 +13,15 @@ exports.transport = (config) ->
     
     transport = 
 
-        request: promised (action, opts, sequence, result) -> 
+        request: promised (action, httpRequest) -> 
 
             #
-            # * request has local promise to allow for reposting
-            #   on authentication failure without affecting the
-            #   the final result promise
-            #
+            # * request has local promise (action) to allow for re reposting 
+            #   on authentication failure without affecting the the final 
+            #   result promise
+            # 
+
+            {opts, promised, sequence} = httpRequest
 
             console.log requesting: sequence
 

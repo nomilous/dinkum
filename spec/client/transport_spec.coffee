@@ -17,7 +17,7 @@ describe 'transport', ->
         https.request = httpsr
 
 
-    it 'can send an http request', (done) -> 
+    it.only 'can send an http request', (done) -> 
  
         http.request = -> 
             done()
@@ -25,7 +25,7 @@ describe 'transport', ->
             on: ->
 
         instance = transport transport: 'http'
-        instance.request path: '/'
+        instance.request opts: {}, promised: {}, sequence: 1
 
     it 'can send an https request', (done) -> 
 
