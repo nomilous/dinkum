@@ -55,6 +55,10 @@ exports.transport = (config) ->
 
                 response.on 'error', (error) -> 
 
+                    #
+                    # #ERROR  dunno when / if this ever happens
+                    #
+
                     console.log UNHANDLED_ERROR: error
 
 
@@ -78,6 +82,16 @@ exports.transport = (config) ->
                         msg = 'dinkum connect timeout'
                         error = new Error msg
                         error.detail = requestOpts
+
+                        #
+                        # errors set state to 'done'
+                        # --------------------------
+                        # 
+                        # Pending retry ability later...
+                        #
+
+                        httpRequest.state = 'done'   #ERROR
+                        httpRequest.error = error
                         promised.reject error
                         action.reject()
 
@@ -88,6 +102,8 @@ exports.transport = (config) ->
                     msg += ' (use allowUncertified to trust it)'
                     error = new Error msg
                     error.detail = requestOpts
+                    httpRequest.state = 'done'   #ERROR
+                    httpRequest.error = error
                     promised.reject error
                     action.reject()
                     return
