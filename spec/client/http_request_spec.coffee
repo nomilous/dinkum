@@ -48,5 +48,4 @@ describe 'HttpRequest', ->
         r.state = 'request'
         r.stateAt.should.equal 12345
         r.state.should.equal 'request'
-
         done()

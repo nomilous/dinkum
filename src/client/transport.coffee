@@ -21,8 +21,6 @@ exports.transport = (config) ->
 
             {opts, promised, sequence} = httpRequest
 
-            console.log requesting: sequence
-
             requestOpts = {}
 
             requestOpts.port     = config.port if config.port?
@@ -31,15 +29,18 @@ exports.transport = (config) ->
             requestOpts.method   = opts.method
             requestOpts.path     = opts.path
 
-            
+
+
+            httpRequest.state = 'create'
             request = require( config.transport ).request requestOpts, (response) -> 
 
-                console.log connected: sequence
 
+                httpRequest.state = 'response'
                 resultObj = 
                     statusCode: response.statusCode
                     headers:    response.headers
                     body:       ''
+
 
                 response.on 'data', (chunk) -> 
 
@@ -49,8 +50,7 @@ exports.transport = (config) ->
                     # - options for large multiparts out via notify
                     #
 
-                    console.log receiving: sequence
-
+                    httpRequest.state = 'receive'
                     resultObj.body += chunk.toString()
 
                 response.on 'error', (error) -> 
@@ -64,9 +64,8 @@ exports.transport = (config) ->
                     # TODO: move from active to done here
                     #
 
-                    console.log done: sequence
-
                     promised.resolve resultObj
+                    httpRequest.state = 'done'
                     action.resolve()
 
 
@@ -104,6 +103,7 @@ exports.transport = (config) ->
 
 
             request.end()
+            httpRequest.state = 'sent'
 
 
     return api = 
