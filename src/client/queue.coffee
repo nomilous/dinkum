@@ -33,6 +33,12 @@ exports.queue = (config = {}) ->
             object.onDone   = (error) -> 
 
                 #
+                # TODO: consider: requestor is a better home for this, 
+                #                 it needs to lead to next request from
+                #                 queue
+                # 
+
+                #
                 # * Object claims done (grep #DONE)
                 #
 
