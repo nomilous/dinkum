@@ -1,4 +1,4 @@
-module.exports = (superFn, fn = {}) -> (args...) -> 
+module.exports = (superFn, fn) -> (args...) -> 
 
         superclass = 
 

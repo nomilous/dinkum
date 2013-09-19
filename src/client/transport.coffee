@@ -70,8 +70,8 @@ exports.transport = (config) ->
                     # * completed / closed inbound socket 
                     # 
 
-                    promised.resolve resultObj
                     httpRequest.state = 'done'  #DONE
+                    promised.resolve resultObj
                     action.resolve()
 
 
