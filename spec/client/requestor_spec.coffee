@@ -18,7 +18,7 @@ describe 'requestor', ->
                     done()
                     then: ->
 
-                instance.request().then ->
+                instance.request().then -> 
 
 
             it 'rejects when enqueue rejects', (done) -> 
@@ -50,7 +50,10 @@ describe 'requestor', ->
                 testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/one'
                 testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/two'
 
-                testable().transport.request = (request) -> request 
+                testable().transport.request = (request) -> 
+
+                            console.log RRRR: request
+                            request 
                             #
                             # 
                             # stub transport to respond with the unsent HttpRequest

@@ -1,4 +1,4 @@
-{promised} = require '../support'
+{deferred} = require '../support'
 
 transport = undefined
 exports.testable = -> transport
@@ -9,16 +9,14 @@ exports.transport = (config) ->
 
         options = require('https').globalAgent.options
         options.rejectUnauthorized = not config.allowUncertified
-        
     
     transport = 
-
-        request: promised (action, httpRequest) -> 
+        request: deferred (action, httpRequest) -> 
 
             #
             # * request has local promise (action) to allow for re reposting 
             #   on authentication failure without affecting the the thefinal 
-            #   result promise
+            #   result promise (httpRequest.promised)
             # 
 
             {opts, promised, sequence} = httpRequest
@@ -68,7 +66,7 @@ exports.transport = (config) ->
 
                     console.log done: sequence
 
-                    result.resolve resultObj
+                    promised.resolve resultObj
                     action.resolve()
 
 
@@ -81,7 +79,7 @@ exports.transport = (config) ->
                         msg = 'dinkum connect timeout'
                         error = new Error msg
                         error.detail = requestOpts
-                        result.reject error
+                        promised.reject error
                         action.reject()
 
             request.on 'error', (error) -> 
@@ -91,7 +89,7 @@ exports.transport = (config) ->
                     msg += ' (use allowUncertified to trust it)'
                     error = new Error msg
                     error.detail = requestOpts
-                    result.reject error
+                    promised.reject error
                     action.reject()
                     return
 
@@ -101,7 +99,7 @@ exports.transport = (config) ->
                 #
 
                 error.detail = requestOpts
-                result.reject error
+                promised.reject error
                 action.reject()
 
 

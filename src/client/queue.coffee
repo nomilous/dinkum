@@ -1,4 +1,4 @@
-{extend, promised} = require '../support'
+{extend, deferred} = require '../support'
 
 queue = undefined
 exports.testable = -> queue
@@ -16,7 +16,7 @@ exports.queue = (config = {}) ->
             items: {}
 
 
-        enqueue: promised (action, object) -> 
+        enqueue: deferred (action, object) -> 
 
             return action.reject(
                 new Error 'dinkum queue overflow'
@@ -30,7 +30,7 @@ exports.queue = (config = {}) ->
             action.resolve()
 
 
-        dequeue: promised (action) -> 
+        dequeue: deferred (action) -> 
 
             process.nextTick -> 
 
@@ -50,7 +50,7 @@ exports.queue = (config = {}) ->
                 )
         
 
-        queue: stats: promised (action) ->
+        queue: stats: deferred (action) ->
 
             action.resolve 
                 pending: 

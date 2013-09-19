@@ -1,4 +1,4 @@
-{extend, promised} = require '../support'
+{extend, deferred} = require '../support'
 {queue}            = require './queue'
 {transport}        = require './transport'
 HttpRequest        = require './http_request'
@@ -17,7 +17,7 @@ exports.requestor = extend queue, (superclass, config = {}) ->
 
         transport: transport config
 
-        request: promised (action, opts, deferral) -> 
+        request: deferred (action, opts, promised) -> 
 
             {resolve, reject, notify} = action
 
@@ -25,10 +25,10 @@ exports.requestor = extend queue, (superclass, config = {}) ->
 
                 #
                 # * enqueue the new HttpRequest with options and the 
-                #   deferral of promised result
+                #   externally promised response 
                 # 
 
-                -> superclass.enqueue new HttpRequest deferral, opts
+                -> superclass.enqueue new HttpRequest promised, opts
                         
                 #
                 # * dequeue any previously accumulated requests 
@@ -39,6 +39,7 @@ exports.requestor = extend queue, (superclass, config = {}) ->
                 #
 
                 -> superclass.dequeue()
+
                 
 
             ]).then(

@@ -20,4 +20,4 @@ exports.Client =
 
 exports.Test = require './test'
 
-exports.promised = require './support/promised'
+exports.deferred = require './support/deferred'
