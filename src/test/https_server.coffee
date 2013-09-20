@@ -1,9 +1,26 @@
 https    = require 'https'
 server   = undefined
 
+log = 
+    show: true
+    debug: (object, string) -> 
+        if log.show then console.log 'DEBUG', string, object
+
+Object.defineProperty log, 'on',
+    get: -> log.show = true
+
+Object.defineProperty log, 'off',
+    get: -> log.show = false
+
+
+
 module.exports = HttpsServer =
 
+
+
     server: 
+
+        log: log
 
         #
         # access to most recent received requests
@@ -86,6 +103,10 @@ module.exports = HttpsServer =
 
             (req, res) -> 
 
+                log.debug 
+                    url: req.url
+                    'request'
+
                 HttpsServer.server.requests.unshift req
                 while HttpsServer.server.requests.length > opts.keep
                     HttpsServer.server.requests.pop()
@@ -104,3 +125,6 @@ module.exports = HttpsServer =
 
 
     stop: (callback) -> server.close callback
+
+
+

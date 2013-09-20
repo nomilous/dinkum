@@ -21,6 +21,9 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
 
             {resolve, reject, notify} = action
 
+            newRequest = new HttpRequest promised, opts
+            newRequest.onDone = requestor.done
+
             sequence([
 
                 #
@@ -28,7 +31,7 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
                 #   externally promised response 
                 # 
 
-                -> superclass.enqueue new HttpRequest promised, opts
+                -> superclass.enqueue newRequest
                         
                 #
                 # * dequeue any previously accumulated requests 
@@ -64,6 +67,19 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
                 notify
 
             )
+
+
+        done: (error, httpRequest) -> 
+
+            console.log DONE: httpRequest.sequence
+
+            #
+            # * inform the queue of this request being done
+            #
+
+            #
+            # * do another round of dequeueing
+            #
 
 
     return api =

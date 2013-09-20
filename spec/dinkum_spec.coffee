@@ -10,6 +10,7 @@ describe 'dinkum', ->
 
     it 'sends GET request to server', (done) -> 
 
+        server.log.off
         client = Client.create
 
             port: 3001
@@ -30,4 +31,36 @@ describe 'dinkum', ->
             # response.statusCode.should.equal 401
 
             done()
+
+
+    it 'sends multiple requests in parallel', (done) -> 
+
+        server.log.on
+        parallel = require 'when/parallel'
+
+        client = Client.create
+
+            requestLimit: 2  # limit to 2 at a time
+            port: 3001
+            allowUncertified: true
+            
+
+
+        parallel( for i in [0..9]
+
+            do (i) -> -> client.get path: '/test/' + i
+
+        ).then( 
+
+            (results) -> 
+
+                console.log RESULTS: results
+                done()
+
+            (error) -> 
+
+                console.log ERROR: error
+                done()
+
+        )
 

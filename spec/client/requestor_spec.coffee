@@ -13,12 +13,38 @@ describe 'requestor', ->
             it 'creates and enqueues all new HttpRequests', (done) -> 
 
                 instance = requestor()
-                testable().superclass.enqueue = (object) ->
-                    object.should.be.an.instanceof HttpRequest
+                testable().superclass.enqueue = (httpRequest) ->
+                    httpRequest.should.be.an.instanceof HttpRequest
                     done()
                     then: ->
 
                 instance.request().then -> 
+
+
+            it 'assigns requestor.done() to handle HttpRequest.onDone()', (done) ->
+
+                instance = requestor()
+                testable().superclass.enqueue = (httpRequest) ->
+
+                    #
+                    # set the new request to done immediately
+                    #
+
+                    httpRequest.state = 'done'
+                    
+
+                console.log testable().done = (error, httpRequest) ->
+
+                    #
+                    # this should be been called with the done request
+                    #
+
+                    httpRequest.state.should.equal 'done'
+                    httpRequest.opts.path.should.equal '/path/1'
+                    done()
+
+                instance.request path: '/path/1'
+
 
 
             it 'rejects when enqueue rejects', (done) -> 

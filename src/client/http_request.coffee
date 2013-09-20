@@ -2,7 +2,7 @@ module.exports = class HttpReuquest
 
     constructor: (@promised, @opts) -> 
 
-        @error   = undefined
+        #@error   = undefined
         sequence = undefined
         onDone   = undefined
 

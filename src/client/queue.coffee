@@ -28,32 +28,9 @@ exports.queue = (config = {}) ->
                 new Error 'dinkum queue overflow'
                 ) if queue.pending.count == config.queueLimit
 
+            try console.log queue: object.opts.path
 
             object.sequence = ++queue.sequence
-            object.onDone   = (error) -> 
-
-                #
-                # TODO: consider: requestor is a better home for this, 
-                #                 it needs to lead to next request from
-                #                 queue
-                # 
-
-                #
-                # * Object claims done (grep #DONE)
-                #
-
-                seq = object.sequence.toString()
-                delete queue.active.items[seq]
-                queue.active.count--
-
-                #
-                # TODO: errors / timeouts could be retried.
-                #       but: much complexity down that road... 
-                #
-
-                console.log REMAINING:
-                    pending: queue.pending.count
-                    active: queue.active.count
                 
             queue.pending.items[ (queue.sequence).toString() ] = object
             queue.pending.count++
