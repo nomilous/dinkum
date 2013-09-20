@@ -112,3 +112,6 @@ describe 'requestor', ->
                 testable().done 'ERROR', 'REQUEST'
 
 
+            it 'sends the next batch of requests that were dequeued'
+
+
