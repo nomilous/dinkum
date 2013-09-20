@@ -69,17 +69,43 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
             )
 
 
-        done: (error, httpRequest) -> 
-
-            console.log DONE: httpRequest.sequence
+        done: deferred (action, error, httpRequest) -> 
 
             #
-            # * inform the queue of this request being done
+            # TODO: nothing is monitoring this promise 
             #
 
+            {resolve, reject, notify} = action 
+
             #
-            # * do another round of dequeueing
+            # a request has completed
+            # -----------------------
+            # 
+            # * inform the queue to adjust accordingly
+            # * get the next batch (probably only one) to send
             #
+
+            sequence([
+
+                -> superclass.done error, httpRequest
+                -> superclass.dequeue()
+
+            ]).then(
+
+                ([NULL, requests]) -> 
+
+                    console.log NEXT: requests
+
+                    parallel( for httpRequest in requests
+
+                        do (httpRequest) -> -> requestor.transport.request httpRequest   
+
+                    ).then resolve, reject, notify
+
+                reject
+                notify
+
+            )
 
 
     return api =

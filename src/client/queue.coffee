@@ -60,7 +60,15 @@ exports.queue = (config = {}) ->
                         queue.pending.count--
                         object
                 )
-        
+
+        done: deferred (action, error, object) -> 
+
+            #
+            # * adjust as done
+            # * resolve action
+            #
+
+            console.log DONE: object.opts
 
         queue: stats: deferred (action) ->
 
@@ -75,4 +83,5 @@ exports.queue = (config = {}) ->
 
         enqueue: queue.enqueue
         dequeue: queue.dequeue
+        done:    queue.done
         queue:   queue.queue

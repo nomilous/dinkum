@@ -8,7 +8,7 @@ describe 'requestor', ->
 
     context 'request', ->
 
-        context 'enqueue', ->
+        xcontext 'enqueue', ->
 
             it 'creates and enqueues all new HttpRequests', (done) -> 
 
@@ -19,32 +19,6 @@ describe 'requestor', ->
                     then: ->
 
                 instance.request().then -> 
-
-
-            it 'assigns requestor.done() to handle HttpRequest.onDone()', (done) ->
-
-                instance = requestor()
-                testable().superclass.enqueue = (httpRequest) ->
-
-                    #
-                    # set the new request to done immediately
-                    #
-
-                    httpRequest.state = 'done'
-                    
-
-                console.log testable().done = (error, httpRequest) ->
-
-                    #
-                    # this should be been called with the done request
-                    #
-
-                    httpRequest.state.should.equal 'done'
-                    httpRequest.opts.path.should.equal '/path/1'
-                    done()
-
-                instance.request path: '/path/1'
-
 
 
             it 'rejects when enqueue rejects', (done) -> 
@@ -64,7 +38,7 @@ describe 'requestor', ->
                 )
 
 
-        context 'dequeue', (done) -> 
+        xcontext 'dequeue', (done) -> 
 
             it 'dequeues already pending requests before new ones', (done) ->
 
@@ -96,4 +70,45 @@ describe 'requestor', ->
                     ]
 
                     done()
+
+        context 'done', -> 
+
+            it 'is assigned to handle HttpRequest.onDone()', (done) ->
+
+                instance = requestor()
+                testable().superclass.enqueue = (httpRequest) ->
+
+                    #
+                    # set the new request to done immediately
+                    #
+
+                    httpRequest.state = 'done'
+                    
+
+                console.log testable().done = (error, httpRequest) ->
+
+                    #
+                    # this should be been called with the done request
+                    #
+
+                    httpRequest.state.should.equal 'done'
+                    httpRequest.opts.path.should.equal '/path/1'
+                    done()
+
+                instance.request path: '/path/1'
+
+
+            it 'calls queue.done() with the httpRequest just completed', (done) -> 
+
+                instance = requestor()
+                testable().superclass.done = (error, object) -> done()
+                testable().done 'ERROR', 'REQUEST'
+
+
+            it 'calls queue.dequeue() to send the next pending requests', (done) -> 
+
+                instance = requestor()
+                testable().superclass.dequeue = -> done()
+                testable().done 'ERROR', 'REQUEST'
+
 
