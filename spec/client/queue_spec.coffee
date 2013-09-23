@@ -3,7 +3,7 @@ should = require 'should'
 
 describe 'queue', -> 
 
-    xcontext 'enqueue', -> 
+    context 'enqueue', -> 
 
         it 'sequences objects onto the pending queue', (done) -> 
 
@@ -130,7 +130,7 @@ describe 'queue', ->
                     done()
 
 
-        it.only 'removes requeued ojects from the active list', (done) -> 
+        it 'removes requeued ojects from the active list', (done) -> 
 
             instance = queue()
             instance.enqueue( object: 'A' ).then ->
@@ -141,6 +141,32 @@ describe 'queue', ->
                         done()
 
 
+    context 'queue.suspend', ->
+
+        it 'causes dequeue to resolve with an empty array', (done) ->
+
+            instance = queue()
+            instance.enqueue( object: 'A' ).then -> 
+                instance.suspend
+                instance.dequeue().then (objects) ->
+                    objects.should.eql []
+                    done()
+
+
+    context 'queue.resume', ->
+
+        it 'causes dequeue to resolve with an empty array', (done) ->
+
+            instance = queue()
+            instance.enqueue( object: 'A' ).then ->
+                instance.suspend
+                instance.dequeue().then (objects) ->
+                    objects.should.eql []
+                    instance.resume
+                    instance.dequeue().then (objects) ->
+                        objects.should.eql [ { object: 'A', sequence: 1 } ]
+                        done()
+                    
 
     context 'queue.done', ->
 

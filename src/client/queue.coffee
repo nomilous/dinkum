@@ -8,6 +8,7 @@ exports.queue = (config = {}) ->
     queue = 
 
         sequence: 0
+        suspended: false
         pending: 
             count: 0
             items: {}
@@ -47,6 +48,8 @@ exports.queue = (config = {}) ->
 
             process.nextTick -> 
 
+                return action.resolve [] if queue.suspended 
+
                 slots = config.requestLimit - queue.active.count
                 action.resolve( 
 
@@ -79,13 +82,15 @@ exports.queue = (config = {}) ->
 
         requeue: deferred (action, object) ->
 
-            seq = object.sequence.toString()
-            queue.redo.items[seq] = object
-            queue.redo.count++
-            delete queue.active.items[seq]
-            queue.active.count--
-
-            action.resolve()
+            try
+                seq = object.sequence.toString()
+                queue.redo.items[seq] = object
+                queue.redo.count++
+                delete queue.active.items[seq]
+                queue.active.count--
+                action.resolve()
+            catch error
+                action.reject error
 
 
         done: deferred (action, error, object) -> 
@@ -116,10 +121,18 @@ exports.queue = (config = {}) ->
                     count: queue.finished.count
 
 
-    return api = 
+    api = 
 
         enqueue: queue.enqueue
         dequeue: queue.dequeue
         requeue: queue.requeue
         done:    queue.done
         queue:   queue.queue
+
+
+    Object.defineProperty api, 'suspend', 
+        get: -> queue.suspended = true
+
+    Object.defineProperty api, 'resume', 
+        get: -> queue.suspended = false
+
