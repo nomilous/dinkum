@@ -1,4 +1,4 @@
-{enclose}   = require '../support'
+{enclose, deferred}   = require '../support'
 {defer}     = require 'when'
 {requestor} = require './requestor'
 
@@ -23,7 +23,13 @@ exports.client = enclose requestor, (superclass, config) ->
 
             result.promise
 
+        stats: deferred (action) -> 
+
+            {resolve, reject, notify} = action
+            superclass.stats().then resolve, reject, notify
+
 
     return api = 
 
         get: client.get
+        stats: client.stats

@@ -106,6 +106,14 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
             )
 
 
+        stats: deferred (action) -> 
+
+            {resolve, reject, notify} = action
+            superclass.queue.stats().then resolve, reject, notify
+
+
+
     return api =
 
         request: requestor.request
+        stats: requestor.stats

@@ -4,6 +4,8 @@
 pipeline = require 'when/pipeline'
 parallel = require 'when/parallel'
 
+interval = undefined
+
 client1 = Client.create  
 
     allowUncertified: true
@@ -12,8 +14,9 @@ client1 = Client.create
 
 client2 = Client.create
     
-    queueLimit: 100000
-    requestLimit: 10
+
+    queueLimit: 100
+    requestLimit: 4
     allowUncertified: true
     hostname: 'localhost'
     port: 3000
@@ -21,10 +24,10 @@ client2 = Client.create
 
 pipeline( [
 
-    (      ) -> client1.get path: '/get/100000/records'
+    (      ) -> client1.get path: '/get/100/records'
     (result) -> 
 
-        console.log "#{result.body[0..50]}..."
+        #console.log "#{result.body[0..50]}..."
         data = JSON.parse result.body
         
         parallel( for record in data.records
@@ -40,12 +43,20 @@ pipeline( [
 ] ).then( 
     
     (result) -> 
-
-        console.log done: result
+        console.log result.map( (r) -> r.statusCode ).join ' '
+        clearInterval interval
 
     (error) -> 
-
-        console.log ERROR: error
+        console.log error.stack
+        clearInterval interval
 
 )
 
+
+interval = setInterval (->
+
+    client2.stats().then (stats) -> 
+
+        console.log "pending: #{stats.pending.count}, active: #{stats.active.count}, done: #{stats.done.count} "
+
+), 1000
