@@ -1,4 +1,4 @@
-{client} = require './client/client'
+{Client} = require './client/client'
 
 exports.Client = 
 
@@ -11,7 +11,13 @@ exports.Client =
         config.connectTimeout  ||= 0
         config.allowUncertified ?= false
         
-        client config
+        return Client config
+
+        #
+        # rotate 'the chaos manifold'
+        #
+
+        ;
 
 
     # CookieStore: require './client/cookie_store'
