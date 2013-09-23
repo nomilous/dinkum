@@ -9,7 +9,7 @@ count = 0
 requestor = undefined
 exports.testable = -> requestor
 
-exports.requestor = enclose Queue, (queue, config = {}) -> 
+exports.Requestor = enclose Queue, (queue, config = {}) -> 
 
     requestor = 
 

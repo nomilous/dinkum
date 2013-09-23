@@ -1,10 +1,10 @@
-{testable, requestor} = require '../../lib/client/requestor'
+{testable, Requestor} = require '../../lib/client/requestor'
 Queue  = require '../../lib/client/queue'
 HttpRequest = require '../../lib/client/http_request'
 should = require 'should'
 {defer} = require 'when'
 
-describe 'requestor', -> 
+describe 'Requestor', -> 
 
     context 'request', ->
 
@@ -12,7 +12,7 @@ describe 'requestor', ->
 
             it 'creates and enqueues all new HttpRequests', (done) -> 
 
-                instance = requestor()
+                instance = Requestor()
                 testable().queue.enqueue = (httpRequest) ->
                     httpRequest.should.be.an.instanceof HttpRequest
                     done()
@@ -23,7 +23,7 @@ describe 'requestor', ->
 
             it 'rejects when enqueue rejects', (done) -> 
 
-                instance = requestor()
+                instance = Requestor()
 
                 testable().queue.enqueue = -> 
                     then: (resolve, reject) -> 
@@ -42,7 +42,7 @@ describe 'requestor', ->
 
             it 'dequeues already pending requests before new ones', (done) ->
 
-                instance = requestor()
+                instance = Requestor()
                 testable().queue.enqueue new HttpRequest 'PROMISED', path: '/one'
                 testable().queue.enqueue new HttpRequest 'PROMISED', path: '/two'
 
@@ -75,7 +75,7 @@ describe 'requestor', ->
 
             it 'is assigned to handle HttpRequest.onDone()', (done) ->
 
-                instance = requestor()
+                instance = Requestor()
                 testable().queue.enqueue = (httpRequest) ->
 
                     #
@@ -100,14 +100,14 @@ describe 'requestor', ->
 
             it 'calls queue.done() with the httpRequest just completed', (done) -> 
 
-                instance = requestor()
+                instance = Requestor()
                 testable().queue.done = (error, object) -> done()
                 testable().done 'ERROR', 'REQUEST'
 
 
             xit 'calls queue.dequeue() to send the next pending requests', (done) -> 
 
-                instance = requestor()
+                instance = Requestor()
                 testable().queue.dequeue = -> done()
                 testable().done 'ERROR', 'REQUEST'
 
