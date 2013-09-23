@@ -35,7 +35,7 @@ describe 'dinkum', ->
 
     it 'sends multiple requests in parallel', (done) -> 
 
-        server.log.on
+        server.log.off
         parallel = require 'when/parallel'
 
         client = Client.create
@@ -54,12 +54,16 @@ describe 'dinkum', ->
 
             (results) -> 
 
-                console.log RESULTS: results
+                results.map( 
+                    (r) -> r.statusCode
+                ).should.eql [ 200, 200, 200, 200, 200, 200, 200, 200, 200, 200 ]
                 done()
 
             (error) -> 
 
-                console.log ERROR: error
+                console.log 
+                    SPEC_ERROR_1: error
+                    spec: __filename
                 done()
 
         )

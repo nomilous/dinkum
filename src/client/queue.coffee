@@ -28,8 +28,6 @@ exports.queue = (config = {}) ->
                 new Error 'dinkum queue overflow'
                 ) if queue.pending.count == config.queueLimit
 
-            try console.log queue: object.opts.path
-
             object.sequence = ++queue.sequence
                 
             queue.pending.items[ (queue.sequence).toString() ] = object

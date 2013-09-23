@@ -94,8 +94,6 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
 
                 ([NULL, requests]) -> 
 
-                    console.log NEXT: requests
-
                     parallel( for httpRequest in requests
 
                         do (httpRequest) -> -> requestor.transport.request httpRequest   
