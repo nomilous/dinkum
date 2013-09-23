@@ -102,6 +102,23 @@ describe 'queue', ->
                         '5': thing: 'E', sequence: 5
                 done()
 
+    context 'queue.done', ->
+
+        it 'removes done object from the active list', (done) ->
+
+            instance = queue()
+            instance.enqueue( object: 'A' ).then ->
+                instance.dequeue().then (objects) ->
+                    error = null
+                    instance.done( error, objects[0] ).then ->
+                        instance.queue.stats().then (stats) ->
+
+                            testable().active.items.should.eql {}
+                            stats.active.count.should.equal 0
+                            stats.done.count.should.equal 1
+                            done()
+
+
 
     context 'queue.status', -> 
 
@@ -121,6 +138,7 @@ describe 'queue', ->
 
                         pending: count: 900
                         active:  count: 100
+                        done:    count: 0
 
                     done()
 

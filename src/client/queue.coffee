@@ -14,7 +14,7 @@ exports.queue = (config = {}) ->
         active:
             count: 0
             items: {}
-        done: 
+        finished: 
             count: 0
 
 
@@ -68,7 +68,15 @@ exports.queue = (config = {}) ->
             # * resolve action
             #
 
-            console.log DONE: object.opts
+            seq = object.sequence.toString()
+            if queue.active.items[seq]?
+                queue.active.count--
+                delete queue.active.items[seq]
+                queue.finished.count++
+
+            action.resolve()
+
+
 
         queue: stats: deferred (action) ->
 
@@ -77,6 +85,8 @@ exports.queue = (config = {}) ->
                     count: queue.pending.count
                 active:
                     count: queue.active.count
+                done: 
+                    count: queue.finished.count
 
 
     return api = 
