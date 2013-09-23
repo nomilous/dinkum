@@ -14,6 +14,10 @@ client1 = Client.create
 
 client2 = Client.create
     
+    #
+    # * limit 100 requests on the queue
+    # * process 4 at a time
+    #
 
     queueLimit: 100
     requestLimit: 4

@@ -102,6 +102,46 @@ describe 'queue', ->
                         '5': thing: 'E', sequence: 5
                 done()
 
+
+    context 'queue.redo', -> 
+
+        it 'requeues objects back onto the front of the queue', (done) -> 
+
+            sequence = require 'when/sequence'
+            instance = queue requestLimit: 3
+            sequence([
+                -> instance.enqueue object: 'A'
+                -> instance.enqueue object: 'B'
+                -> instance.enqueue object: 'C'
+                -> instance.enqueue object: 'D'
+            ]).then -> instance.dequeue().then (objects) -> 
+                sequence([
+                    -> instance.done null, objects[1]
+                    -> instance.done null, objects[2]
+                    -> instance.requeue objects[0]
+                    -> instance.dequeue()
+                ]).then ([done1, done2, requeued, dequeued]) -> 
+
+                    dequeued.should.eql [
+                        { object: 'A', sequence: 1 }
+                        { object: 'D', sequence: 4 }
+                    ]
+
+                    done()
+
+
+        it.only 'removes requeued ojects from the active list', (done) -> 
+
+            instance = queue()
+            instance.enqueue( object: 'A' ).then ->
+                instance.dequeue().then (objects) -> 
+                    instance.requeue( objects[0] ).then -> 
+
+                        should.not.exist testable().active.items['1']
+                        done()
+
+
+
     context 'queue.done', ->
 
         it 'removes done object from the active list', (done) ->

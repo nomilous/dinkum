@@ -14,6 +14,9 @@ exports.queue = (config = {}) ->
         active:
             count: 0
             items: {}
+        redo: 
+            count: 0
+            items: {}
         finished: 
             count: 0
 
@@ -47,17 +50,43 @@ exports.queue = (config = {}) ->
                 slots = config.requestLimit - queue.active.count
                 action.resolve( 
 
-                    for seq of queue.pending.items
+                    ( 
+                        for seq of queue.redo.items
 
-                        break if --slots < 0
+                            break if --slots < 0
+                            object = queue.redo.items[seq]
+                            queue.active.items[seq] = object
+                            delete queue.redo.items[seq]
+                            queue.active.count++
+                            queue.redo.count--
+                            object 
 
-                        object = queue.pending.items[seq]
-                        queue.active.items[seq] = object
-                        delete queue.pending.items[seq]
-                        queue.active.count++
-                        queue.pending.count--
-                        object
+                    ).concat(
+
+                        for seq of queue.pending.items
+
+                            break if --slots < 0
+
+                            object = queue.pending.items[seq]
+                            queue.active.items[seq] = object
+                            delete queue.pending.items[seq]
+                            queue.active.count++
+                            queue.pending.count--
+                            object
+
+                    )
                 )
+
+        requeue: deferred (action, object) ->
+
+            seq = object.sequence.toString()
+            queue.redo.items[seq] = object
+            queue.redo.count++
+            delete queue.active.items[seq]
+            queue.active.count--
+
+            action.resolve()
+
 
         done: deferred (action, error, object) -> 
 
@@ -91,5 +120,6 @@ exports.queue = (config = {}) ->
 
         enqueue: queue.enqueue
         dequeue: queue.dequeue
+        requeue: queue.requeue
         done:    queue.done
         queue:   queue.queue
