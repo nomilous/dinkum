@@ -1,13 +1,13 @@
-{testable, queue} = require '../../lib/client/queue'
+{testable, Queue} = require '../../lib/client/queue'
 should = require 'should'
 
-describe 'queue', -> 
+describe 'Queue', -> 
 
     context 'enqueue', -> 
 
         it 'sequences objects onto the pending queue', (done) -> 
 
-            instance = queue()
+            instance = Queue()
             instance.enqueue thing: 'A'
             instance.enqueue thing: 'B'
 
@@ -22,12 +22,12 @@ describe 'queue', ->
 
         it 'allows for future persistable queue', (done) -> 
 
-            instance = queue()
+            instance = Queue()
             instance.enqueue('THING A').then -> done() # saving to queue
 
         it 'rejects on queueLimit overflow', (done) -> 
 
-            instance = queue 
+            instance = Queue 
 
                 queueLimit: 1
 
@@ -42,7 +42,7 @@ describe 'queue', ->
 
         it 'transfers items onto the active queue', (done) -> 
 
-            instance = queue()
+            instance = Queue()
             instance.enqueue thing: 'A'
             instance.enqueue thing: 'B'
             instance.dequeue()
@@ -63,7 +63,7 @@ describe 'queue', ->
 
         it 'resolves with the array of dequeued objects', (done) -> 
 
-            instance = queue()
+            instance = Queue()
 
             instance.enqueue 'THING A'
 
@@ -74,7 +74,7 @@ describe 'queue', ->
 
         it 'resolves with empty array when the queue is empty', (done) ->
 
-            instance = queue()
+            instance = Queue()
             instance.dequeue().then (objects) -> 
 
                 objects.length.should.equal 0
@@ -83,7 +83,7 @@ describe 'queue', ->
 
         it 'requestLimit dequeue according to the number of objects on the active queue', (done) -> 
 
-            instance = queue requestLimit: 4
+            instance = Queue requestLimit: 4
                 
             instance.enqueue thing: 'A'
             instance.enqueue thing: 'B'
@@ -108,7 +108,7 @@ describe 'queue', ->
         it 'requeues objects back onto the front of the queue', (done) -> 
 
             sequence = require 'when/sequence'
-            instance = queue requestLimit: 3
+            instance = Queue requestLimit: 3
             sequence([
                 -> instance.enqueue object: 'A'
                 -> instance.enqueue object: 'B'
@@ -132,7 +132,7 @@ describe 'queue', ->
 
         it 'removes requeued ojects from the active list', (done) -> 
 
-            instance = queue()
+            instance = Queue()
             instance.enqueue( object: 'A' ).then ->
                 instance.dequeue().then (objects) -> 
                     instance.requeue( objects[0] ).then -> 
@@ -145,7 +145,7 @@ describe 'queue', ->
 
         it 'causes dequeue to resolve with an empty array', (done) ->
 
-            instance = queue()
+            instance = Queue()
             instance.enqueue( object: 'A' ).then -> 
                 instance.suspend
                 instance.dequeue().then (objects) ->
@@ -157,7 +157,7 @@ describe 'queue', ->
 
         it 'causes dequeue to resolve with an empty array', (done) ->
 
-            instance = queue()
+            instance = Queue()
             instance.enqueue( object: 'A' ).then ->
                 instance.suspend
                 instance.dequeue().then (objects) ->
@@ -172,12 +172,12 @@ describe 'queue', ->
 
         it 'removes done object from the active list', (done) ->
 
-            instance = queue()
+            instance = Queue()
             instance.enqueue( object: 'A' ).then ->
                 instance.dequeue().then (objects) ->
                     error = null
                     instance.done( error, objects[0] ).then ->
-                        instance.queue.stats().then (stats) ->
+                        instance.stats().then (stats) ->
 
                             testable().active.items.should.eql {}
                             stats.active.count.should.equal 0
@@ -186,11 +186,11 @@ describe 'queue', ->
 
 
 
-    context 'queue.status', -> 
+    context 'queue.stats', -> 
 
         it 'provides report on status', (done) -> 
 
-            instance = queue
+            instance = Queue
 
                 queueLimit: 1000
                 requestLimit:  100
@@ -199,7 +199,7 @@ describe 'queue', ->
             instance.dequeue()
 
             process.nextTick -> 
-                instance.queue.stats().then (stats) -> 
+                instance.stats().then (stats) -> 
                     stats.should.eql
 
                         pending: count: 900

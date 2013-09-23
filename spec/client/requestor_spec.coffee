@@ -1,5 +1,5 @@
 {testable, requestor} = require '../../lib/client/requestor'
-queue  = require '../../lib/client/queue'
+Queue  = require '../../lib/client/queue'
 HttpRequest = require '../../lib/client/http_request'
 should = require 'should'
 {defer} = require 'when'
@@ -8,12 +8,12 @@ describe 'requestor', ->
 
     context 'request', ->
 
-        xcontext 'enqueue', ->
+        context 'enqueue', ->
 
             it 'creates and enqueues all new HttpRequests', (done) -> 
 
                 instance = requestor()
-                testable().superclass.enqueue = (httpRequest) ->
+                testable().queue.enqueue = (httpRequest) ->
                     httpRequest.should.be.an.instanceof HttpRequest
                     done()
                     then: ->
@@ -25,7 +25,7 @@ describe 'requestor', ->
 
                 instance = requestor()
 
-                testable().superclass.enqueue = -> 
+                testable().queue.enqueue = -> 
                     then: (resolve, reject) -> 
                         reject new Error 'enqueue error'
 
@@ -38,13 +38,13 @@ describe 'requestor', ->
                 )
 
 
-        xcontext 'dequeue', (done) -> 
+        context 'dequeue', (done) -> 
 
             it 'dequeues already pending requests before new ones', (done) ->
 
                 instance = requestor()
-                testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/one'
-                testable().superclass.enqueue new HttpRequest 'PROMISED', path: '/two'
+                testable().queue.enqueue new HttpRequest 'PROMISED', path: '/one'
+                testable().queue.enqueue new HttpRequest 'PROMISED', path: '/two'
 
                 testable().transport.request = (request) -> return request 
                             #
@@ -76,7 +76,7 @@ describe 'requestor', ->
             it 'is assigned to handle HttpRequest.onDone()', (done) ->
 
                 instance = requestor()
-                testable().superclass.enqueue = (httpRequest) ->
+                testable().queue.enqueue = (httpRequest) ->
 
                     #
                     # set the new request to done immediately
@@ -85,7 +85,7 @@ describe 'requestor', ->
                     httpRequest.state = 'done'
                     
 
-                console.log testable().done = (error, httpRequest) ->
+                testable().done = (error, httpRequest) ->
 
                     #
                     # this should be been called with the done request
@@ -101,14 +101,14 @@ describe 'requestor', ->
             it 'calls queue.done() with the httpRequest just completed', (done) -> 
 
                 instance = requestor()
-                testable().superclass.done = (error, object) -> done()
+                testable().queue.done = (error, object) -> done()
                 testable().done 'ERROR', 'REQUEST'
 
 
-            it 'calls queue.dequeue() to send the next pending requests', (done) -> 
+            xit 'calls queue.dequeue() to send the next pending requests', (done) -> 
 
                 instance = requestor()
-                testable().superclass.dequeue = -> done()
+                testable().queue.dequeue = -> done()
                 testable().done 'ERROR', 'REQUEST'
 
 

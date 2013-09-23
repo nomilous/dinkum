@@ -1,5 +1,5 @@
 {enclose, deferred} = require '../support'
-{queue}            = require './queue'
+{Queue}            = require './queue'
 {transport}       = require './transport'
 HttpRequest      = require './http_request'
 sequence        = require 'when/sequence'
@@ -9,11 +9,11 @@ count = 0
 requestor = undefined
 exports.testable = -> requestor
 
-exports.requestor = enclose queue, (superclass, config = {}) -> 
+exports.requestor = enclose Queue, (queue, config = {}) -> 
 
     requestor = 
 
-        superclass: superclass # testability
+        queue: queue # testability
 
         transport: transport config
 
@@ -31,7 +31,7 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
                 #   externally promised response 
                 # 
 
-                -> superclass.enqueue newRequest
+                -> queue.enqueue newRequest
                         
                 #
                 # * dequeue any previously accumulated requests 
@@ -41,7 +41,7 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
                 #   was just enqueued
                 #
 
-                -> superclass.dequeue()
+                -> queue.dequeue()
 
                 
 
@@ -87,8 +87,8 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
 
             sequence([
 
-                -> superclass.done error, httpRequest
-                -> superclass.dequeue()
+                -> queue.done error, httpRequest
+                -> queue.dequeue()
 
             ]).then(
 
@@ -109,7 +109,7 @@ exports.requestor = enclose queue, (superclass, config = {}) ->
         stats: deferred (action) -> 
 
             {resolve, reject, notify} = action
-            superclass.queue.stats().then resolve, reject, notify
+            queue.stats().then resolve, reject, notify
 
 
 

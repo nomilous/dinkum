@@ -3,7 +3,7 @@
 queue = undefined
 exports.testable = -> queue
 
-exports.queue = (config = {}) -> 
+exports.Queue = (config = {}) -> 
 
     queue = 
 
@@ -55,7 +55,6 @@ exports.queue = (config = {}) ->
 
                     ( 
                         for seq of queue.redo.items
-
                             break if --slots < 0
                             object = queue.redo.items[seq]
                             queue.active.items[seq] = object
@@ -66,10 +65,8 @@ exports.queue = (config = {}) ->
 
                     ).concat(
 
-                        for seq of queue.pending.items
-
+                        for seq of queue.pending.items 
                             break if --slots < 0
-
                             object = queue.pending.items[seq]
                             queue.active.items[seq] = object
                             delete queue.pending.items[seq]
@@ -110,7 +107,7 @@ exports.queue = (config = {}) ->
 
 
 
-        queue: stats: deferred (action) ->
+        stats: deferred (action) ->
 
             action.resolve 
                 pending: 
@@ -127,7 +124,7 @@ exports.queue = (config = {}) ->
         dequeue: queue.dequeue
         requeue: queue.requeue
         done:    queue.done
-        queue:   queue.queue
+        stats:   queue.stats
 
 
     Object.defineProperty api, 'suspend', 
