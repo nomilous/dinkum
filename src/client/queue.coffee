@@ -98,6 +98,8 @@ exports.Queue = (config = {}) ->
 
                 when 'done'
 
+                    console.log done: 1
+
                     seq = object.sequence.toString()
                     if queue.active.items[seq]?
                         queue.active.count--
@@ -105,6 +107,8 @@ exports.Queue = (config = {}) ->
                         queue.finished.count++
                     action.resolve()
                     queue.emitter.emit 'object::done'
+
+                    console.log done: 2
                     return
 
                 else action.resolve()
@@ -136,7 +140,10 @@ exports.Queue = (config = {}) ->
         #
         # TODO: may need to export emitter.otherApiBits('too')
         #
-        on:      queue.emitter.on
+        on: (event, handler) ->     
+
+            console.log arguments
+            queue.emitter.on
         
 
 

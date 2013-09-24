@@ -22,6 +22,7 @@ exports.Transport = (config, queue) ->
             #   result promise (httpRequest.promised)
             # 
 
+            {resolve, reject, notify}  = action
             {opts, promised, sequence} = httpRequest
 
             requestOpts = {}
@@ -79,11 +80,16 @@ exports.Transport = (config, queue) ->
 
                     else
 
-                        
-
                         httpRequest.state = 'done'  #DONE
+                        queue.update( 'done', httpRequest ).then resolve, reject, notify
+
+                        #
+                        # final result resolves the promise that was made to 
+                        # the external caller.
+                        #
+
                         promised.resolve resultObj
-                        action.resolve()
+
 
 
             request.on 'socket', (socket) -> 

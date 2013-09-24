@@ -75,6 +75,8 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
             # TODO: nothing is monitoring this promise 
             #
 
+            console.log DO_NEXT: 1
+
             {resolve, reject, notify} = action 
 
             #
