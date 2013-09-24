@@ -193,7 +193,7 @@ describe 'Transport', ->
                 done()
 
 
-        it 'assigns httpRequest state as authenticate on response 401', (done) -> 
+        it 'calls authenticator on 401 response', (done) -> 
 
             server.log.off
             transport = Transport
@@ -212,10 +212,12 @@ describe 'Transport', ->
 
 
             server.setResponse statusCode: 401
-            transport.request( mockHttpRequest ).then ->
 
-                mockHttpRequest.state.should.equal 'authenticate'
-                done()
+            _transport().authenticator.authenticate = -> done()
+
+            transport.request mockHttpRequest
+
+
 
 
 

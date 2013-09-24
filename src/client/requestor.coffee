@@ -5,7 +5,6 @@ HttpRequest      = require './http_request'
 sequence        = require 'when/sequence'
 parallel       = require 'when/parallel'
 
-count = 0
 testable = undefined
 exports._requestor = -> testable
 

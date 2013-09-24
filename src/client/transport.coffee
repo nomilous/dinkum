@@ -1,9 +1,10 @@
-{deferred} = require '../support'
+{enclose, deferred} = require '../support'
+{Authenticator}     = require './authenticator'
 
 testable = undefined
 exports._transport = -> testable
 
-exports.Transport = (config, queue) -> 
+exports.Transport = enclose Authenticator, (authenticator, config, queue) -> 
 
     if config.transport == 'https' 
 
@@ -12,7 +13,12 @@ exports.Transport = (config, queue) ->
     
     transport = 
 
+        #
+        # testable
+        #
+
         queue: queue
+        authenticator: authenticator
 
         request: deferred (action, httpRequest) -> 
 
@@ -75,6 +81,7 @@ exports.Transport = (config, queue) ->
 
                     if resultObj.statusCode == 401
 
+                        transport.authenticator.authenticate()
                         httpRequest.state = 'authenticate'
                         action.resolve()
 
