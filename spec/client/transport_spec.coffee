@@ -77,7 +77,7 @@ describe 'Transport', ->
                 on: (event, listener) -> if event == 'error'
                     listener new Error 'DEPTH_ZERO_SELF_SIGNED_CERT'
 
-            instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
+            instance = Transport {transport: 'https', port: 3000, hostname: 'localhost'}, @mockQueue
             instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised:
                 reject: (error) -> 
                     error.should.match /use config.allowUncertified to trust it/
@@ -126,7 +126,7 @@ describe 'Transport', ->
                     listener new Error "assumption"
 
 
-            instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
+            instance = Transport { transport: 'https', port: 3000, hostname: 'localhost' }, @mockQueue
             instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised:
                 reject: (error) -> 
                     error.should.match /assumption/

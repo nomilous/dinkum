@@ -81,15 +81,21 @@ exports.Transport = (config, queue) ->
                     else
 
                         httpRequest.state = 'done'  #DONE
-                        queue.update( 'done', httpRequest ).then resolve, reject, notify
+                        queue.update( 'done', httpRequest ).then( 
 
-                        #
-                        # final result resolves the promise that was made to 
-                        # the external caller.
-                        #
+                            -> 
+                                #
+                                # final resultObj resolves the promise that was made to 
+                                # the external caller once the queue is updated 
+                                #
 
-                        promised.resolve resultObj
+                                resolve()
+                                promised.resolve resultObj 
 
+                            reject
+                            notify
+
+                        )
 
 
             request.on 'socket', (socket) -> 
@@ -111,10 +117,21 @@ exports.Transport = (config, queue) ->
 
                         httpRequest.state = 'done'   #ERROR #DONE
                         httpRequest.error = error
-                        promised.reject error
-                        action.reject()
+                        queue.update( 'done', httpRequest ).then( 
+                            -> 
+                                reject()
+                                promised.reject error
+                            reject
+                            notify
+                        )
+                        
 
             request.on 'error', (error) -> 
+
+                #
+                # ASSUMPTION: all request errors mean there will be no 
+                #             usable response from the server
+                #
 
                 if error.message == 'DEPTH_ZERO_SELF_SIGNED_CERT'
                     msg = 'dinkum encounter with uncertified server' 
@@ -123,18 +140,24 @@ exports.Transport = (config, queue) ->
                     error.detail = requestOpts
                     httpRequest.state = 'done'   #ERROR #DONE
                     httpRequest.error = error
-                    promised.reject error
-                    action.reject()
+                    queue.update( 'done', httpRequest ).then( 
+                        -> 
+                            reject()
+                            promised.reject error
+                        reject
+                        notify
+                    )
                     return
 
-                #
-                # ASSUMPTION: all request errors mean there will be no 
-                #             usable response from the server
-                #
-
                 error.detail = requestOpts
-                promised.reject error
-                action.reject()
+                queue.update( 'done', httpRequest ).then( 
+                    -> 
+                        reject()
+                        promised.reject error
+                    reject
+                    notify
+                )
+
 
 
             request.end()
