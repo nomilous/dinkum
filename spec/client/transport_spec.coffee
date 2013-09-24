@@ -1,4 +1,4 @@
-{testable, transport} = require '../../lib/client/transport'
+{testable, Transport} = require '../../lib/client/transport'
 http      = require 'http'
 https     = require 'https'
 should    = require 'should'
@@ -6,7 +6,7 @@ should    = require 'should'
 httpr  = undefined
 httpsr = undefined
 
-describe 'transport', -> 
+describe 'Transport', -> 
     
     beforeEach -> 
         httpr  = http.request
@@ -24,7 +24,7 @@ describe 'transport', ->
             end: ->
             on: ->
 
-        instance = transport transport: 'http'
+        instance = Transport transport: 'http'
         instance.request opts: {}, sequence: 1, promised: {}
 
     it 'can send an https request', (done) -> 
@@ -33,7 +33,7 @@ describe 'transport', ->
             done()
             end: ->
             on: ->
-        instance = transport transport: 'https'
+        instance = Transport transport: 'https'
         instance.request opts: {}, promised: {}, sequence: 2
 
 
@@ -46,13 +46,13 @@ describe 'transport', ->
             end: ->
             on: ->
 
-        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
         instance.request opts: {}, promised: {}, sequence: 1
 
 
     it 'assigns method, path from opts', (done) -> 
 
-        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
         https.request = (opts) -> 
             opts.method.should.equal 'GET'
             opts.path.should.equal '/'
@@ -70,7 +70,7 @@ describe 'transport', ->
             on: (event, listener) -> if event == 'error'
                 listener new Error 'DEPTH_ZERO_SELF_SIGNED_CERT'
 
-        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
         instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised:
             reject: (error) -> 
                 error.should.match /use allowUncertified to trust it/
@@ -89,7 +89,7 @@ describe 'transport', ->
                         setTimeout: (value) -> value.should.equal 20
                         on: (event, listener) -> if event == 'timeout' then listener()
             
-        instance = transport transport: 'https', connectTimeout: 20
+        instance = Transport transport: 'https', connectTimeout: 20
         instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised: 
             reject: (error) -> 
                 error.should.match /dinkum connect timeout/
@@ -106,7 +106,7 @@ describe 'transport', ->
                         setTimeout: (value) -> 
                             throw 'should not set timeout'
             
-        instance = transport transport: 'https', connectTimeout: 0
+        instance = Transport transport: 'https', connectTimeout: 0
         instance.request  opts: { method: 'GET', path: '/' }, sequence: 1, promised: {}
         done()
 
@@ -119,7 +119,7 @@ describe 'transport', ->
                 listener new Error "assumption"
 
 
-        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
         instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised:
             reject: (error) -> 
                 error.should.match /assumption/
@@ -128,7 +128,7 @@ describe 'transport', ->
 
     it 'accumulates body as string and resolves including header and status code', (done) ->
 
-        instance = transport transport: 'https', port: 3000, hostname: 'localhost'
+        instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
         https.request = (opts, callback) -> 
             callback
                 headers:    'HEADERS'

@@ -1,6 +1,6 @@
 {enclose, deferred} = require '../support'
 {Queue}            = require './queue'
-{transport}       = require './transport'
+{Transport}       = require './transport'
 HttpRequest      = require './http_request'
 sequence        = require 'when/sequence'
 parallel       = require 'when/parallel'
@@ -15,7 +15,7 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
 
         queue: queue # testability
 
-        transport: transport config
+        transport: Transport config
 
         request: deferred (action, opts, promised) -> 
 

@@ -1,9 +1,10 @@
-{deferred} = require '../support'
+{enclose, deferred} = require '../support'
+{Queue}            = require './queue'
 
 transport = undefined
 exports.testable = -> transport
 
-exports.transport = (config) -> 
+exports.Transport = (config) -> 
 
     if config.transport == 'https' 
 
