@@ -173,7 +173,7 @@ describe 'Transport', ->
 
         it 'assigns httpRequest state as done on response end', (done) -> 
 
-            server.log.on
+            server.log.off
             transport = Transport
                 transport:  'https'
                 allowUncertified: true

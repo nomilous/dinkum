@@ -2,19 +2,26 @@
 {Queue}            = require './queue'
 {Transport}       = require './transport'
 HttpRequest      = require './http_request'
-sequence        = require 'when/sequence'
-parallel       = require 'when/parallel'
+CookieStore     = require './cookie_store'
+sequence       = require 'when/sequence'
+parallel      = require 'when/parallel'
 
 testable = undefined
 exports._requestor = -> testable
 
 exports.Requestor = enclose Queue, (queue, config = {}) -> 
 
+    #
+    # cookies always enabled for now
+    #
+
+    cookies = CookieStore.create config
+
     requestor = 
 
         queue: queue # testability
 
-        transport: Transport config, queue
+        transport: Transport config, queue, cookies
 
         request: deferred (action, opts, promised) -> 
 

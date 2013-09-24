@@ -6,7 +6,7 @@
 # and provide a resulting session context using cookies. 
 #
 
-module.exports = (config, queue) ->
+module.exports = (config, queue, cookies) ->
 
     basicAuth =
 

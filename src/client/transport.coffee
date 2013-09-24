@@ -1,17 +1,10 @@
 {enclose, deferred} = require '../support'
 {Authenticator}     = require './authenticator'
-CookieStore         = require './cookie_store'
 
 testable = undefined
 exports._transport = -> testable
 
-exports.Transport = enclose Authenticator, (authenticator, config, queue) -> 
-
-    #
-    # cookies always enabled for now
-    #
-
-    cookies = CookieStore.create config
+exports.Transport = enclose Authenticator, (authenticator, config, queue, cookies) -> 
 
     if config.transport == 'https' 
 
@@ -26,6 +19,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
         queue: queue
         authenticator: authenticator
+        cookies: cookies
 
         request: deferred (action, httpRequest) -> 
 

@@ -144,3 +144,9 @@ describe 'Authenticator', ->
             should.exist _authenticator().queue
             done()
 
+        it 'is assigned the cookie store via enclosed config-chain requestor..transport..', (done) -> 
+
+            requestor = Requestor()
+            should.exist _authenticator().cookies
+            done()
+

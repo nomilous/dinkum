@@ -4,13 +4,14 @@ HttpRequest = require './http_request'
 testable = undefined
 exports._authenticator = -> testable
 
-exports.Authenticator = (config, queue) -> 
+exports.Authenticator = (config, queue, cookies) -> 
 
     config ||= {}
 
     authenticator = 
 
         queue: queue
+        cookies: cookies
 
         authenticating: 0
 
@@ -36,7 +37,7 @@ exports.Authenticator = (config, queue) ->
                 #
 
                 modulePath = "#{ config.authenticator.module }"
-                authenticator.scheme = require( modulePath ) config, queue
+                authenticator.scheme = require( modulePath ) config, queue, cookies
 
             catch error
 
@@ -47,7 +48,7 @@ exports.Authenticator = (config, queue) ->
                     #
 
                     modulePath = "./authenticators/#{ config.authenticator.module }"
-                    authenticator.scheme = require( modulePath ) config, queue
+                    authenticator.scheme = require( modulePath ) config, queue, cookies
 
 
             try authenticator.type = authenticator.scheme.type
