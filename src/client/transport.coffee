@@ -22,8 +22,6 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
         request: deferred (action, httpRequest) -> 
 
-            try console.log request: httpRequest.opts.path
-
             #
             # * request has local promise (action) to allow for re reposting 
             #   on authentication failure without affecting the the thefinal 
@@ -33,6 +31,14 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
             {resolve, reject, notify}  = action
             {opts, promised, sequence} = httpRequest
 
+            if authenticator.type == 'request'
+
+                unless authenticator.requestAuth httpRequest
+
+                    reject()
+                    return
+
+
             requestOpts = {}
 
             requestOpts.port     = config.port if config.port?
@@ -40,6 +46,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
             
             requestOpts.method   = opts.method
             requestOpts.path     = opts.path
+            requestOpts.auth     = opts.auth if opts.auth?
 
 
 
@@ -96,13 +103,16 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
                             reject()
                             error = new Error 'dinkum authentication failure (request)'
-                            error.detail = requestOpts
+                            error.detail = 
+                                request:  requestOpts
+                                response: resultObj
+
                             httpRequest.promised.reject error
                             return
                             
 
                         httpRequest.state = 'authenticating'
-                        transport.authenticator.authenticate( httpRequest ).then(
+                        transport.authenticator.sessionAuth( httpRequest ).then(
 
                             (authRequest) ->
 
@@ -151,7 +161,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
                         request.abort()
                         msg = 'dinkum connect timeout'
                         error = new Error msg
-                        error.detail = requestOpts
+                        error.detail = request: requestOpts
 
                         #
                         # errors set state to 'done'
@@ -182,7 +192,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
                     msg = 'dinkum encounter with uncertified server' 
                     msg += ' (use config.allowUncertified to trust it)'
                     error = new Error msg
-                    error.detail = requestOpts
+                    error.detail = request: requestOpts
                     httpRequest.state = 'done'   #ERROR #DONE
                     httpRequest.error = error
                     queue.update( 'done', httpRequest ).then( 
@@ -194,7 +204,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
                     )
                     return
 
-                error.detail = requestOpts
+                error.detail = request: requestOpts
                 queue.update( 'done', httpRequest ).then( 
                     -> 
                         reject()

@@ -51,4 +51,3 @@ module.exports = (config) ->
             authRequest = forbiddenRequest
             authRequest.authenticator = 'basic_auth'
             action.resolve authRequest
-

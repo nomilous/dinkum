@@ -60,14 +60,29 @@ exports.Authenticator = (config, queue) ->
             config.authenticator? and authenticator.assign()
 
 
-        authenticate: deferred (action, httpRequest) -> 
+        requestAuth: (httpRequest) -> 
+
+            try 
+
+                authenticator.scheme.requestAuth httpRequest
+                return true
+
+            catch error
+
+                try error.detail = request: httpRequest.opts
+                httpRequest.promised.reject error
+                return false
+
+
+
+        sessionAuth: deferred (action, httpRequest) -> 
 
             {resolve, reject, notify} = action
 
             unless authenticator.configured()
 
                 error = new Error 'dinkum absence of authenticator scheme'
-                error.detail = httpRequest.opts
+                error.detail = request: httpRequest.opts
 
                 #
                 # * reject all the way to the response promise held by 
@@ -114,6 +129,11 @@ exports.Authenticator = (config, queue) ->
 
                     authenticator.authenticating = 0
                     authenticator.scheme.sessionAuth action, httpRequest
+
+                    #
+                    # TODO: reject the entire queue (clean up)
+                    #
+
                     return
 
                 queue.requeue( httpRequest ).then resolve, reject, notify
@@ -131,6 +151,7 @@ exports.Authenticator = (config, queue) ->
 
     return api = 
 
-        authenticate: authenticator.authenticate
-        type: authenticator.type
+        sessionAuth: authenticator.sessionAuth
+        requestAuth:  authenticator.requestAuth
+        type:        authenticator.type
 

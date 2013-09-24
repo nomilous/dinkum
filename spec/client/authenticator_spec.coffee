@@ -20,13 +20,13 @@ describe 'Authenticator', ->
                 then: (resolve, reject, notify) -> resolve()
 
 
-    context 'first call to authenticate()', -> 
+    context 'first call to sessionAuth()', -> 
 
 
         it 'rejects the request promise if no authentication scheme is specified', (done) -> 
 
             instance = Authenticator()
-            instance.authenticate promised: reject: (error) -> 
+            instance.sessionAuth promised: reject: (error) -> 
 
                 error.should.match /dinkum absence of authenticator scheme/
 
@@ -36,18 +36,18 @@ describe 'Authenticator', ->
         it 'assigns the authenticator scheme', (done) -> 
 
             instance = Authenticator @config, @queue
-            instance.authenticate sequence: 1
+            instance.sessionAuth sequence: 1
             should.exist _authenticator().scheme
             done()
 
         it 'assigns the authenticator scheme only once', (done) ->
 
             instance = Authenticator @config, @queue
-            instance.authenticate sequence: 1
+            instance.sessionAuth sequence: 1
             should.exist _authenticator().scheme
             _authenticator().scheme.TEST = 1
 
-            instance.authenticate sequence: 1
+            instance.sessionAuth sequence: 1
             _authenticator().scheme.TEST.should.equal 1
             done()
 
@@ -58,7 +58,7 @@ describe 'Authenticator', ->
 
             instance = Authenticator @config, @queue
             _authenticator().authenticating.should.equal 0
-            instance.authenticate sequence: 1
+            instance.sessionAuth sequence: 1
             _authenticator().authenticating.should.equal 1
             done()
 
@@ -70,7 +70,7 @@ describe 'Authenticator', ->
 
                     action.resolve 'AUTH REQUEST'
 
-            instance.authenticate( sequence: 1 ).then (request) -> 
+            instance.sessionAuth( sequence: 1 ).then (request) -> 
 
                 request.should.equal 'AUTH REQUEST'
                 done()
@@ -79,7 +79,7 @@ describe 'Authenticator', ->
         it 'suspends the queue', (done) -> 
 
             instance = Authenticator @config, @queue
-            instance.authenticate( sequence: 1 ).then (request) => 
+            instance.sessionAuth( sequence: 1 ).then (request) => 
 
                 @queue.suspend.should.equal true
                 done()
@@ -87,13 +87,13 @@ describe 'Authenticator', ->
         it 'does not requeue the first request that requires authentication', (done) -> 
 
             instance = Authenticator @config, @queue
-            instance.authenticate( sequence: 1 ).then (request) => 
+            instance.sessionAuth( sequence: 1 ).then (request) => 
 
                 @requeued.should.eql []
                 done()
 
 
-    context 'subsequent calls to authenticate()', -> 
+    context 'subsequent calls to sessionAuth()', -> 
 
         #
         # a client that starts up with several requests in parallel
@@ -108,9 +108,9 @@ describe 'Authenticator', ->
 
             instance = Authenticator @config, @queue
             sequence([
-                -> instance.authenticate sequence: 1
-                -> instance.authenticate sequence: 2
-                -> instance.authenticate sequence: 3
+                -> instance.sessionAuth sequence: 1
+                -> instance.sessionAuth sequence: 2
+                -> instance.sessionAuth sequence: 3
 
             ]).then => 
 
