@@ -119,7 +119,18 @@ describe 'Queue', ->
                             stats.done.count.should.equal 1
                             done()
 
+        it.only 'emits object::done event when done', (done) -> 
 
+            instance = Queue()
+            instance.enqueue( object: 'A' ).then ->
+                instance.dequeue().then (objects) ->
+
+                    _queue().emitter.emit = (event) -> 
+
+                        event.should.equal 'object::done'
+                        done()
+
+                    instance.update( 'done', objects[0] )
 
 
     context 'queue.redo', -> 

@@ -1,4 +1,5 @@
 {deferred} = require '../support'
+{EventEmitter} = require 'events'
 
 queue = undefined
 exports._queue = -> queue
@@ -9,6 +10,7 @@ exports.Queue = (config = {}) ->
 
         sequence: 0
         suspended: false
+        emitter: new EventEmitter
         pending: 
             count: 0
             items: {}
@@ -92,17 +94,20 @@ exports.Queue = (config = {}) ->
 
         update: deferred (action, state, object) -> 
 
-            try 
-                switch state
+            try switch state
 
-                    when 'done' 
-                        seq = object.sequence.toString()
-                        if queue.active.items[seq]?
-                            queue.active.count--
-                            delete queue.active.items[seq]
-                            queue.finished.count++
+                when 'done'
 
-                action.resolve()
+                    seq = object.sequence.toString()
+                    if queue.active.items[seq]?
+                        queue.active.count--
+                        delete queue.active.items[seq]
+                        queue.finished.count++
+                    action.resolve()
+                    queue.emitter.emit 'object::done'
+                    return
+
+                else action.resolve()
 
             catch error
 
@@ -126,8 +131,13 @@ exports.Queue = (config = {}) ->
         dequeue: queue.dequeue
         requeue: queue.requeue
         update:  queue.update
-        on:      ->
         stats:   queue.stats
+
+        #
+        # TODO: may need to export emitter.otherApiBits('too')
+        #
+        on:      queue.emitter.on
+        
 
 
     Object.defineProperty api, 'suspend', 
