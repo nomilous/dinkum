@@ -23,7 +23,7 @@ exports.Authenticator = (config, queue) ->
         assign: -> 
 
             return false unless config.authenticator.module?
-            return true if authenticator.scheme?
+            return true if authenticator.scheme? # already assigned
 
             try
 
@@ -50,9 +50,11 @@ exports.Authenticator = (config, queue) ->
 
             authenticator.scheme?
 
+
         configured: ->
 
             config.authenticator? and authenticator.assign()
+
 
         authenticate: deferred (action, httpRequest) -> 
 
@@ -62,6 +64,12 @@ exports.Authenticator = (config, queue) ->
 
                 error = new Error 'dinkum absence of authenticator scheme'
                 error.detail = httpRequest.opts
+
+                #
+                # * reject all the way to the response promise held by 
+                #   the outside caller 
+                #
+
                 httpRequest.promised.reject error
                 action.reject()
                 return
@@ -69,7 +77,11 @@ exports.Authenticator = (config, queue) ->
             if authenticator.authenticating == 0
 
                 #
-                # * first call to authenticate suspends the queue
+                # new authentication attempt
+                # --------------------------
+                # 
+                # * suspend the queue
+                # TODO * create an authentication request via authentication schema
                 #
 
                 queue.suspend = true
@@ -78,7 +90,20 @@ exports.Authenticator = (config, queue) ->
 
             else 
 
+                #
+                # authentication already in progress
+                # ----------------------------------
+                # 
+                # * while authentication is in progress all requests to which
+                #   the server responds with a 401 are requeued, this only
+                #   occurs when multiple requests were sent in parallel before
+                #   the authentication, the first request initiates the authcycle
+                #   and all 401s that follow pass through here 
+                #  
+
                 queue.requeue( httpRequest ).then resolve, reject, notify
+                newAuthRequest = null
+                action.resolve newAuthRequest
 
             
     

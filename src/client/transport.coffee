@@ -82,10 +82,33 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
                     if resultObj.statusCode == 401
 
                         httpRequest.state = 'authenticating'
-                        transport.authenticator.authenticate( httpRequest ).then (request) ->
 
-                            console.log AUTHENTICATE: request
-                            
+                        transport.authenticator.authenticate( httpRequest ).then(
+
+                            (authRequest) ->
+
+                                if authRequest? 
+
+                                    console.log authRequest
+
+                                    #
+                                    # * authenticator only generates an authRequest if one 
+                                    #   should be sent, on multiple concurrent 401s it will
+                                    #   generate only on the first
+                                    #
+                                    # * recurse to send the authRequest
+                                    # 
+                                    # TODO * reject if the authRequest is also generates a 401
+                                    # 
+
+                                    transport.request( authRequest ).then resolve, reject, notify
+                                    
+
+                            reject
+                            notify
+
+                        )
+                                
                         
 
                     else
