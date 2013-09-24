@@ -67,7 +67,7 @@ server = https.createServer
 
         if req.url.match /\/requires\/basic_auth/
 
-            console.log req.headers
+            console.log auth: req.headers.authorization
 
             if req.headers.authorization?
 

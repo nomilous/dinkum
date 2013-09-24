@@ -1,7 +1,7 @@
 #! /usr/bin/env coffee
 
 {Client} = require '../lib/dinkum'
-parallel = require 'when/parallel'
+sequence = require 'when/sequence'
 
 withAuth = Client.create
     hostname: 'localhost'
@@ -13,7 +13,7 @@ withAuth = Client.create
         username: 'nomilous'
         password: '∆'
 
-parallel([
+sequence([
 
     -> withAuth.get path: '/requires/basic_auth/1' 
     -> withAuth.get path: '/requires/basic_auth/2' 

@@ -28,6 +28,8 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
             #   result promise (httpRequest.promised)
             # 
 
+            console.log 'TODO: switch on cookie store'
+
             {resolve, reject, notify}  = action
             {opts, promised, sequence} = httpRequest
 
@@ -112,7 +114,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
                             
 
                         httpRequest.state = 'authenticating'
-                        transport.authenticator.sessionAuth( httpRequest ).then(
+                        transport.authenticator.startSessionAuth( httpRequest ).then(
 
                             (authRequest) ->
 
@@ -135,22 +137,64 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
                     else
 
-                        httpRequest.state = 'done'  #DONE
-                        queue.update( 'done', httpRequest ).then( 
+                        finish = -> 
 
-                            -> 
-                                #
-                                # final resultObj resolves the promise that was made to 
-                                # the external caller once the queue is updated 
-                                #
+                            httpRequest.state = 'done'  #DONE
+                            queue.update( 'done', httpRequest ).then( 
 
-                                resolve()
-                                promised.resolve resultObj 
+                                -> 
+                                    #
+                                    # final resultObj resolves the promise that was made to 
+                                    # the external caller once the queue is updated 
+                                    #
 
-                            reject
-                            notify
+                                    resolve()
+                                    promised.resolve resultObj 
 
-                        )
+                                reject
+                                notify
+
+                            )
+
+                        
+                        if httpRequest.authenticator?
+
+                            #
+                            # * this request was an authenticator, the auth is finished
+                            #
+                            
+                            transport.authenticator.endSessionAuth( httpRequest, resultObj ).then( 
+                                
+                                ->  
+                                    #
+                                    # TODO: the absence of a 401 in response to an authentication
+                                    #       does not necessarilly mean that the authentication has
+                                    #       succeeded (FIX)
+                                    #
+
+                                    queue.suspend = false
+
+                                    #
+                                    # TODO: future auth modules will manipulate the queue directly
+                                    #       or send a sequence of requests to perform the auth,
+                                    # 
+                                    #       this call to finish() assumes that the current request
+                                    #       in resultObj is the original request that requered the
+                                    #       authentication, it is resolved into the external callers
+                                    #       request promise (FIX)
+                                    #
+
+                                    finish()
+
+                                reject
+                                notify
+
+                            )
+                            return
+
+                        finish()
+                            
+
 
 
             request.on 'socket', (socket) -> 

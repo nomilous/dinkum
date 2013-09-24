@@ -36,7 +36,7 @@ exports.Authenticator = (config, queue) ->
                 #
 
                 modulePath = "#{ config.authenticator.module }"
-                authenticator.scheme = require( modulePath ) config
+                authenticator.scheme = require( modulePath ) config, queue
 
             catch error
 
@@ -47,7 +47,7 @@ exports.Authenticator = (config, queue) ->
                     #
 
                     modulePath = "./authenticators/#{ config.authenticator.module }"
-                    authenticator.scheme = require( modulePath ) config
+                    authenticator.scheme = require( modulePath ) config, queue
 
 
             try authenticator.type = authenticator.scheme.type
@@ -75,7 +75,7 @@ exports.Authenticator = (config, queue) ->
 
 
 
-        sessionAuth: deferred (action, httpRequest) -> 
+        startSessionAuth: deferred (action, httpRequest) -> 
 
             {resolve, reject, notify} = action
 
@@ -105,7 +105,7 @@ exports.Authenticator = (config, queue) ->
 
                 queue.suspend = true
                 authenticator.authenticating = httpRequest.sequence
-                authenticator.scheme.sessionAuth action, httpRequest
+                authenticator.scheme.startSessionAuth action, httpRequest
 
             else
 
@@ -128,7 +128,7 @@ exports.Authenticator = (config, queue) ->
                     # 
 
                     authenticator.authenticating = 0
-                    authenticator.scheme.sessionAuth action, httpRequest
+                    authenticator.scheme.startSessionAuth action, httpRequest
 
                     #
                     # TODO: reject the entire queue (clean up)
@@ -137,6 +137,12 @@ exports.Authenticator = (config, queue) ->
                     return
 
                 queue.requeue( httpRequest ).then resolve, reject, notify
+
+
+        endSessionAuth: deferred (action, httpRequest, httpResponse) -> 
+
+            try authenticator.scheme.endSessionAuth action, httpRequest, httpResponse
+
 
 
     authenticator.assign() if config.authenticator?
@@ -151,7 +157,8 @@ exports.Authenticator = (config, queue) ->
 
     return api = 
 
-        sessionAuth: authenticator.sessionAuth
-        requestAuth:  authenticator.requestAuth
-        type:        authenticator.type
+        startSessionAuth: authenticator.startSessionAuth
+        endSessionAuth: authenticator.endSessionAuth
+        requestAuth: authenticator.requestAuth
+        type: authenticator.type
 

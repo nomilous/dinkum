@@ -252,7 +252,7 @@ describe 'Transport', ->
             server.setResponse statusCode: 401
             server.setResponse statusCode: 200, body: 'AUTHENTICATED'
 
-            _transport().authenticator.sessionAuth = -> 
+            _transport().authenticator.startSessionAuth = -> 
                 then: (resolve) -> 
 
                     #

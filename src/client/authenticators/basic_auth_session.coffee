@@ -6,7 +6,7 @@
 # and provide a resulting session context using cookies. 
 #
 
-module.exports = (config) ->
+module.exports = (config, queue) ->
 
     basicAuth =
 
@@ -23,7 +23,7 @@ module.exports = (config) ->
             action.reject()
 
 
-        sessionAuth: (action, forbiddenRequest) -> 
+        startSessionAuth: (action, forbiddenRequest) -> 
 
             if forbiddenRequest.authenticator == 'basic_auth'
 
@@ -50,4 +50,14 @@ module.exports = (config) ->
             basicAuth.originalRequest = forbiddenRequest
             authRequest = forbiddenRequest
             authRequest.authenticator = 'basic_auth'
+
+            username = config.authenticator.username
+            password = config.authenticator.password
+            authRequest.opts.auth = "#{username}:#{password}"
+
             action.resolve authRequest
+
+
+        endSessionAuth: (action, authRequest, authResponse) -> 
+
+            action.resolve()
