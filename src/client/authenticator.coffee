@@ -1,4 +1,5 @@
-{deferred} = require '../support'
+{deferred}    = require '../support'
+HttpRequest = require './http_request' 
 
 testable = undefined
 exports._authenticator = -> testable
@@ -11,9 +12,10 @@ exports.Authenticator = (config, queue) ->
 
         authenticating: false
 
-        authenticate: -> 
+        authenticate: deferred (action) -> 
 
             authenticator.authenticating = true
+            action.resolve new HttpRequest
     
     #
     # only the latest instance is accessable to test
