@@ -1,4 +1,4 @@
-{testable, Client} = require '../../lib/client/client'
+{_client, Client} = require '../../lib/client/client'
 should = require 'should'
 
 describe 'Client', ->
@@ -21,7 +21,7 @@ describe 'Client', ->
             it 'calls requestor.request', (done) -> 
 
                 instance = Client()
-                testable().requestor.request = -> 
+                _client().requestor.request = -> 
                     done()
                     then: ->
 
@@ -31,7 +31,7 @@ describe 'Client', ->
             it 'sets method GET', (done) -> 
 
                 instance = Client()
-                testable().requestor.request = (opts) ->
+                _client().requestor.request = (opts) ->
                     opts.method.should.equal 'GET'
                     done()
                     then: ->
@@ -42,7 +42,7 @@ describe 'Client', ->
             it 'accepts an existing promise of a result and passes it to the requestor', (done) -> 
 
                 instance = Client()
-                testable().requestor.request = (opts, result) -> 
+                _client().requestor.request = (opts, result) -> 
                     result.should.equal 'the deferral of a promise to return a result'
                     done()
                     then: ->
@@ -53,7 +53,7 @@ describe 'Client', ->
             it 'will generate a new result promise if not provided', (done) -> 
 
                 instance = Client()
-                testable().requestor.request = (opts, result) -> 
+                _client().requestor.request = (opts, result) -> 
 
                     should.exist result.resolver
                     done()
@@ -65,7 +65,7 @@ describe 'Client', ->
             it 'returns the result promise', (done) -> 
 
                 instance = Client()
-                testable().requestor.request = (opts, result) -> then: ->
+                _client().requestor.request = (opts, result) -> then: ->
                     
                 instance.get( path: '/', { promise: 'THE RESULT' } ).should.equal 'THE RESULT'
                 done()
@@ -76,7 +76,7 @@ describe 'Client', ->
             #
             # it 'returns the promise that the request will be sent', (done) -> 
             #     instance = Client()
-            #     testable().requestor.request = -> return 'the promise to send request'
+            #     _client().requestor.request = -> return 'the promise to send request'
             #     instance.get( path: '/' ).should.equal 'the promise to send request'
             #     done()
             # 

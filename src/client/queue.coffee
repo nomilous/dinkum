@@ -1,7 +1,7 @@
 {deferred} = require '../support'
 
 queue = undefined
-exports.testable = -> queue
+exports._queue = -> queue
 
 exports.Queue = (config = {}) -> 
 

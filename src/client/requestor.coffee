@@ -7,7 +7,7 @@ parallel       = require 'when/parallel'
 
 count = 0
 requestor = undefined
-exports.testable = -> requestor
+exports._requestor = -> requestor
 
 exports.Requestor = enclose Queue, (queue, config = {}) -> 
 

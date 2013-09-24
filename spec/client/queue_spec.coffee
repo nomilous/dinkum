@@ -1,4 +1,4 @@
-{testable, Queue} = require '../../lib/client/queue'
+{_queue, Queue} = require '../../lib/client/queue'
 should = require 'should'
 
 describe 'Queue', -> 
@@ -11,7 +11,7 @@ describe 'Queue', ->
             instance.enqueue thing: 'A'
             instance.enqueue thing: 'B'
 
-            testable().pending.should.eql 
+            _queue().pending.should.eql 
 
                 count: 2
                 items: 
@@ -49,10 +49,10 @@ describe 'Queue', ->
 
             process.nextTick ->
 
-                testable().pending.should.eql 
+                _queue().pending.should.eql 
                     count: 0
                     items: {}
-                testable().active.should.eql
+                _queue().active.should.eql
                     count: 2
                     items: 
                         '1': thing: 'A', sequence: 1
@@ -96,7 +96,7 @@ describe 'Queue', ->
                 #console.log objects
 
                 objects.length.should.equal 4
-                testable().pending.should.eql 
+                _queue().pending.should.eql 
                     count: 1
                     items: 
                         '5': thing: 'E', sequence: 5
@@ -114,7 +114,7 @@ describe 'Queue', ->
                     instance.update( 'done', objects[0] ).then ->
 
                         instance.stats().then (stats) ->
-                            testable().active.items.should.eql {}
+                            _queue().active.items.should.eql {}
                             stats.active.count.should.equal 0
                             stats.done.count.should.equal 1
                             done()
@@ -157,7 +157,7 @@ describe 'Queue', ->
                 instance.dequeue().then (objects) -> 
                     instance.requeue( objects[0] ).then -> 
 
-                        should.not.exist testable().active.items['1']
+                        should.not.exist _queue().active.items['1']
                         done()
 
 

@@ -3,7 +3,7 @@
 {Requestor} = require './requestor'
 
 client = undefined
-exports.testable = -> client
+exports._client = -> client
 
 exports.Client = enclose Requestor, (requestor, config) -> 
 

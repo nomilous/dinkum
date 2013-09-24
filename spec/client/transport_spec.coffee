@@ -1,4 +1,4 @@
-{testable, Transport} = require '../../lib/client/transport'
+{_transport, Transport} = require '../../lib/client/transport'
 {Requestor} = require '../../lib/client/requestor'
 {Test} = require '../../lib/dinkum'
 {start, stop, server} = Test.HttpsServer
@@ -162,7 +162,7 @@ describe 'Transport', ->
         it 'is initialized with queue (by the Requestor)', (done) ->
 
             requestor = Requestor transport: 'https'
-            should.exist testable().queue
+            should.exist _transport().queue
             done()
 
 
@@ -189,7 +189,7 @@ describe 'Transport', ->
                 done()
 
 
-        it.only 'assigns httpRequest state as authenticate on response 401', (done) -> 
+        it 'assigns httpRequest state as authenticate on response 401', (done) -> 
 
             server.log.off
             transport = Transport

@@ -32,11 +32,3 @@ module.exports = class HttpReuquest
         Object.defineProperty this, 'stateAt', 
             enumerable: true
             get: -> local.state.at
-
-
-        Object.defineProperty this, 'onDone', 
-            enumerable: false
-            set: (fn) -> 
-                return if onDone?
-                return unless typeof fn is 'function'
-                onDone = fn
