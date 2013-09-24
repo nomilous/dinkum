@@ -31,7 +31,7 @@ exports.Queue = (config = {}) ->
             #
 
             return action.reject(
-                new Error 'dinkum queue overflow'
+                new Error 'dinkum queue overflow (use config.queueLimit)'
                 ) if queue.pending.count == config.queueLimit
 
             object.sequence = ++queue.sequence

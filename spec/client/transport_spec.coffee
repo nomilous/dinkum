@@ -80,7 +80,7 @@ describe 'Transport', ->
             instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
             instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised:
                 reject: (error) -> 
-                    error.should.match /use allowUncertified to trust it/
+                    error.should.match /use config.allowUncertified to trust it/
                     done()
 
 

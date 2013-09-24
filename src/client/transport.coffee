@@ -118,7 +118,7 @@ exports.Transport = (config, queue) ->
 
                 if error.message == 'DEPTH_ZERO_SELF_SIGNED_CERT'
                     msg = 'dinkum encounter with uncertified server' 
-                    msg += ' (use allowUncertified to trust it)'
+                    msg += ' (use config.allowUncertified to trust it)'
                     error = new Error msg
                     error.detail = requestOpts
                     httpRequest.state = 'done'   #ERROR #DONE
