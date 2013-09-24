@@ -8,19 +8,23 @@ module.exports = (config) ->
 
         failedAuth: (action) -> 
 
-            basicAuth.originalRequest.reject new Error 'Authentication Failed'
+            error = new Error 'dinkum session authentication failure'
+            try error.detail = basicAuth.originalRequest.opts
+            basicAuth.originalRequest.promised.reject error
             basicAuth.originalRequest = undefined
             action.reject()
 
 
-        startAuth: (action, forbiddenRequest) -> 
+        sessionAuth: (action, forbiddenRequest) -> 
 
             if forbiddenRequest.authenticator == 'basic_auth'
 
                 #
-                # forbidden request is the authentication attempt
-                # -----------------------------------------------
+                # forbiddenRequest has already been marked
+                # ----------------------------------------
                 # 
+                # * This request WAS the authentication attempt
+                # * Still got 401
                 # * Authentication has failed
                 #
 

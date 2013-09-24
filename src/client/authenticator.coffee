@@ -90,7 +90,7 @@ exports.Authenticator = (config, queue) ->
 
                 queue.suspend = true
                 authenticator.authenticating = httpRequest.sequence
-                authenticator.scheme.startAuth action, httpRequest
+                authenticator.scheme.sessionAuth action, httpRequest
 
             else
 
@@ -104,14 +104,16 @@ exports.Authenticator = (config, queue) ->
                 #   the authentication, the first request initiates the authcycle
                 #   and all 401s that follow pass through here 
                 # 
-                # * unless this new 401 is in response to the authentication attempt
-                #   itself, then the authentication has failed
-                #  
 
                 if httpRequest.authenticator? 
 
-                    console.log AUTH_HAS_FAILED: 1
+                    # 
+                    # * this new 401 is in response to the authentication attempt
+                    #   itself, the authentication has failed
+                    # 
+
                     authenticator.authenticating = 0
+                    authenticator.scheme.sessionAuth action, httpRequest
                     return
 
                 queue.requeue( httpRequest ).then resolve, reject, notify
