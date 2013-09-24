@@ -20,6 +20,7 @@ exports.Authenticator = (config, queue) ->
         # 
 
         scheme: undefined 
+        type: undefined
         assign: -> 
 
             return false unless config.authenticator.module?
@@ -47,6 +48,9 @@ exports.Authenticator = (config, queue) ->
 
                     modulePath = "./authenticators/#{ config.authenticator.module }"
                     authenticator.scheme = require( modulePath ) config
+
+
+            try authenticator.type = authenticator.scheme.type
 
             authenticator.scheme?
 
@@ -81,14 +85,14 @@ exports.Authenticator = (config, queue) ->
                 # --------------------------
                 # 
                 # * suspend the queue
-                # TODO * create an authentication request via authentication schema
+                # * create an authentication request via authentication schema
                 #
 
                 queue.suspend = true
                 authenticator.authenticating = httpRequest.sequence
-                action.resolve new HttpRequest
+                authenticator.scheme.startAuth action, httpRequest
 
-            else 
+            else
 
                 #
                 # authentication already in progress
@@ -99,12 +103,21 @@ exports.Authenticator = (config, queue) ->
                 #   occurs when multiple requests were sent in parallel before
                 #   the authentication, the first request initiates the authcycle
                 #   and all 401s that follow pass through here 
+                # 
+                # * unless this new 401 is in response to the authentication attempt
+                #   itself, then the authentication has failed
                 #  
 
-                queue.requeue( httpRequest ).then resolve, reject, notify
-                newAuthRequest = null
-                action.resolve newAuthRequest
+                if httpRequest.authenticator? 
 
+                    console.log AUTH_HAS_FAILED: 1
+                    authenticator.authenticating = 0
+                    return
+
+                queue.requeue( httpRequest ).then resolve, reject, notify
+
+
+    authenticator.assign() if config.authenticator?
             
     
     #
@@ -113,6 +126,9 @@ exports.Authenticator = (config, queue) ->
 
     testable = authenticator
 
+
     return api = 
 
         authenticate: authenticator.authenticate
+        type: authenticator.type
+

@@ -10,7 +10,7 @@ c = Client.create
     port:      3000
     
     authenticator: 
-        module:   'basic_auth'
+        module:   'basic_auth_session'
         username: 'nomilous'
         password: '∆'
 

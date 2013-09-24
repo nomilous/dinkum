@@ -22,6 +22,8 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
         request: deferred (action, httpRequest) -> 
 
+            try console.log request: httpRequest.opts.path
+
             #
             # * request has local promise (action) to allow for re reposting 
             #   on authentication failure without affecting the the thefinal 
@@ -81,28 +83,38 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
                     if resultObj.statusCode == 401
 
-                        httpRequest.state = 'authenticating'
+                        unless transport.authenticator.type == 'session'
 
+                            #
+                            # * only authentication schema of type=session will attempt 
+                            #   an authentication after a 401
+                            # 
+                            # * all other types perfom the authentication inline before
+                            #   each request, for those a 401 means authentication has
+                            #   automatically failed
+                            #
+
+                            reject()
+                            error = new Error 'dinkum authentication failure'
+                            error.detail = requestOpts
+                            httpRequest.promised.reject error
+                            return
+                            
+
+                        httpRequest.state = 'authenticating'
                         transport.authenticator.authenticate( httpRequest ).then(
 
                             (authRequest) ->
 
                                 if authRequest? 
 
-                                    console.log authRequest
-
                                     #
                                     # * authenticator only generates an authRequest if one 
                                     #   should be sent, on multiple concurrent 401s it will
                                     #   generate only on the first
-                                    #
-                                    # * recurse to send the authRequest
-                                    # 
-                                    # TODO * reject if the authRequest is also generates a 401
                                     # 
 
-                                    transport.request( authRequest ).then resolve, reject, notify
-                                    
+                                    transport.request( authRequest ).then resolve, reject, notify 
 
                             reject
                             notify

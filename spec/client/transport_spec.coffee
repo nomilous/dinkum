@@ -232,7 +232,7 @@ describe 'Transport', ->
                 allowUncertified: true
                 port:       3001
                 authenticator: 
-                    module: 'basic_auth'
+                    module: 'basic_auth_session'
                 @mockQueue
 
             mockHttpRequest = 
@@ -267,7 +267,7 @@ describe 'Transport', ->
                             # server response to the authRequest
                             #
 
-                            console.log afterAuth.body.should.equal 'AUTHENTICATED'
+                            afterAuth.body.should.equal 'AUTHENTICATED'
                             done()
                             
                         opts = method: 'GET'
@@ -279,5 +279,5 @@ describe 'Transport', ->
 
         it 'rejects authentication failure if the authRequest also generates a 401', (done) -> 
 
-            
+
 
