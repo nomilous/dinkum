@@ -81,6 +81,8 @@ exports.Queue = (config = {}) ->
 
         requeue: deferred (action, object) ->
 
+            console.log REQUEUE: object
+
             try
                 seq = object.sequence.toString()
                 queue.redo.items[seq] = object
@@ -153,8 +155,6 @@ exports.Queue = (config = {}) ->
 
 
     Object.defineProperty api, 'suspend', 
-        get: -> queue.suspended = true
-
-    Object.defineProperty api, 'resume', 
-        get: -> queue.suspended = false
+        get: -> queue.suspended
+        set: (value) -> queue.suspended = value
 

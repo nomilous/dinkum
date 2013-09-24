@@ -65,7 +65,7 @@ server = https.createServer
             )
             return
 
-        if req.url == '/requires/authentication'
+        if req.url.match /\/requires\/authentication/
 
             res.writeHead 401, {}
             res.end()

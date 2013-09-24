@@ -81,9 +81,12 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
                     if resultObj.statusCode == 401
 
-                        transport.authenticator.authenticate()
-                        httpRequest.state = 'authenticate'
-                        action.resolve()
+                        httpRequest.state = 'authenticating'
+                        transport.authenticator.authenticate( httpRequest ).then (request) ->
+
+                            console.log AUTHENTICATE: request
+                            
+                        
 
                     else
 

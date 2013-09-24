@@ -2,6 +2,7 @@
 {Requestor} = require '../../lib/client/requestor'
 HttpRequest = require '../../lib/client/http_request'
 should = require 'should'
+sequence = require 'when/sequence'
 
 describe 'Authenticator', ->
 
@@ -9,6 +10,15 @@ describe 'Authenticator', ->
         @config = 
             authenticator: 
                 module: 'basic_auth'
+
+    beforeEach -> 
+        @requeued = []
+        @queue = 
+            suspend: false
+            requeue: (object) => 
+                @requeued.push object
+                then: (resolve, reject, notify) -> resolve()
+
 
     context 'first call to authenticate()', -> 
 
@@ -25,14 +35,14 @@ describe 'Authenticator', ->
 
         it 'assigns the authenticator scheme', (done) -> 
 
-            instance = Authenticator @config
+            instance = Authenticator @config, @queue
             instance.authenticate sequence: 1
             should.exist _authenticator().scheme
             done()
 
         it 'assigns the authenticator scheme only once', (done) ->
 
-            instance = Authenticator @config
+            instance = Authenticator @config, @queue
             instance.authenticate sequence: 1
             should.exist _authenticator().scheme
             _authenticator().scheme.TEST = 1
@@ -46,7 +56,7 @@ describe 'Authenticator', ->
 
         it 'sets authenticating to the sequence number of the first request', (done) -> 
 
-            instance = Authenticator @config
+            instance = Authenticator @config, @queue
             _authenticator().authenticating.should.equal 0
             instance.authenticate sequence: 1
             _authenticator().authenticating.should.equal 1
@@ -55,14 +65,28 @@ describe 'Authenticator', ->
 
         it 'resolves with an authentication request', (done) ->
 
-            instance = Authenticator @config
+            instance = Authenticator @config, @queue
             instance.authenticate( sequence: 1 ).then (request) -> 
 
                 request.should.be.an.instanceof HttpRequest
                 done()
 
 
-        it 'suspends the queue'
+        it 'suspends the queue', (done) -> 
+
+            instance = Authenticator @config, @queue
+            instance.authenticate( sequence: 1 ).then (request) => 
+
+                @queue.suspend.should.equal true
+                done()
+
+        it 'does not requeue the first request that requires authentication', (done) -> 
+
+            instance = Authenticator @config, @queue
+            instance.authenticate( sequence: 1 ).then (request) => 
+
+                @requeued.should.eql []
+                done()
 
 
     context 'subsequent calls to authenticate()', -> 
@@ -76,7 +100,21 @@ describe 'Authenticator', ->
         # pending the authentication completion
         #
 
+        it 'requeues request that require authentication while authentication is in progress', (done) -> 
 
+            instance = Authenticator @config, @queue
+            sequence([
+                -> instance.authenticate sequence: 1
+                -> instance.authenticate sequence: 2
+                -> instance.authenticate sequence: 3
+
+            ]).then => 
+
+                @requeued.should.eql [
+                    { sequence: 2 }
+                    { sequence: 3 }
+                ]
+                done()
 
 
     context 'integrations', -> 

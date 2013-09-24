@@ -34,7 +34,7 @@ describe 'Queue', ->
             instance.enqueue thing: 'A'
             instance.enqueue( thing: 'B' ).then (->), (error) -> 
 
-                error.message.should.equal 'dinkum queue overflow'
+                error.message.should.match /dinkum queue overflow/
                 done()
         
 
@@ -119,7 +119,7 @@ describe 'Queue', ->
                             stats.done.count.should.equal 1
                             done()
 
-        it.only 'emits object::done event when done', (done) -> 
+        it 'emits object::done event when done', (done) -> 
 
             instance = Queue()
             instance.enqueue( object: 'A' ).then ->
@@ -172,28 +172,28 @@ describe 'Queue', ->
                         done()
 
 
-    context 'queue.suspend', ->
+    context 'queue.suspend = true', ->
 
         it 'causes dequeue to resolve with an empty array', (done) ->
 
             instance = Queue()
             instance.enqueue( object: 'A' ).then -> 
-                instance.suspend
+                instance.suspend = true
                 instance.dequeue().then (objects) ->
                     objects.should.eql []
                     done()
 
 
-    context 'queue.resume', ->
+    context 'queue.resume = false', ->
 
         it 'causes dequeue to resolve with an empty array', (done) ->
 
             instance = Queue()
             instance.enqueue( object: 'A' ).then ->
-                instance.suspend
+                instance.suspend = true
                 instance.dequeue().then (objects) ->
                     objects.should.eql []
-                    instance.resume
+                    instance.suspend = false
                     instance.dequeue().then (objects) ->
                         objects.should.eql [ { object: 'A', sequence: 1 } ]
                         done()

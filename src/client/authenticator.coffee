@@ -56,6 +56,8 @@ exports.Authenticator = (config, queue) ->
 
         authenticate: deferred (action, httpRequest) -> 
 
+            {resolve, reject, notify} = action
+
             unless authenticator.configured()
 
                 error = new Error 'dinkum absence of authenticator scheme'
@@ -64,8 +66,21 @@ exports.Authenticator = (config, queue) ->
                 action.reject()
                 return
 
-            authenticator.authenticating = httpRequest.sequence
-            action.resolve new HttpRequest
+            if authenticator.authenticating == 0
+
+                #
+                # * first call to authenticate suspends the queue
+                #
+
+                queue.suspend = true
+                authenticator.authenticating = httpRequest.sequence
+                action.resolve new HttpRequest
+
+            else 
+
+                queue.requeue( httpRequest ).then resolve, reject, notify
+
+            
     
     #
     # only the latest instance is accessable to test

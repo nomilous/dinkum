@@ -1,6 +1,7 @@
 #! /usr/bin/env coffee
 
 {Client} = require '../lib/dinkum'
+parallel = require 'when/parallel'
 
 c = Client.create
 
@@ -13,7 +14,14 @@ c = Client.create
         username: 'nomilous'
         password: '∆'
 
-c.get( path: '/requires/authentication' ).then(
+parallel([
+
+    -> c.get path: '/requires/authentication/1' 
+    -> c.get path: '/requires/authentication/2' 
+    -> c.get path: '/requires/authentication/3' 
+
+
+]).then(
 
     (result) -> console.log RESULT: result
     (error)  -> console.log ERROR:  error
