@@ -1,5 +1,5 @@
 {_requestor, Requestor} = require '../../lib/client/requestor'
-Queue  = require '../../lib/client/queue'
+{_transport, Transport} = require '../../lib/client/transport'
 HttpRequest = require '../../lib/client/http_request'
 should = require 'should'
 {defer} = require 'when'
@@ -71,47 +71,31 @@ describe 'Requestor', ->
 
                     done()
 
-        context 'done', -> 
+        context 'doNext', -> 
 
-            it 'is assigned to handle HttpRequest.onDone()', (done) ->
+            it 'is assigned to handle queue object::done'
 
-                instance = Requestor()
-                _requestor().queue.enqueue = (httpRequest) ->
-
-                    #
-                    # set the new request to done immediately
-                    #
-
-                    httpRequest.state = 'done'
-                    
-
-                _requestor().done = (error, httpRequest) ->
-
-                    #
-                    # this should be been called with the done request
-                    #
-
-                    httpRequest.state.should.equal 'done'
-                    httpRequest.opts.path.should.equal '/path/1'
-                    done()
-
-                instance.request path: '/path/1'
-
-
-            it 'calls queue.done() with the httpRequest just completed', (done) -> 
-
-                instance = Requestor()
-                _requestor().queue.done = (error, object) -> done()
-                _requestor().done 'ERROR', 'REQUEST'
-
-
-            xit 'calls queue.dequeue() to send the next pending requests', (done) -> 
+            it 'calls queue.dequeue() to send the next pending requests', (done) -> 
 
                 instance = Requestor()
                 _requestor().queue.dequeue = -> done()
-                _requestor().done 'ERROR', 'REQUEST'
+                _requestor().doNext()
 
 
-            it 'sends the next batch of requests that were dequeued'
+            xit 'sends the next batch of requests that were dequeued', (done) ->
+
+                instance = Requestor()
+                _requestor().queue.dequeue = -> then: (resolve) -> resolve ['NEXT']
+                
+
+                _transport().request = -> 
+
+                    console.log arguments
+                    #
+                    # wrong instance... how?
+                    #
+
+                _requestor().doNext()
+
 
 

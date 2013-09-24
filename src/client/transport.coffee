@@ -79,6 +79,8 @@ exports.Transport = (config, queue) ->
 
                     else
 
+                        
+
                         httpRequest.state = 'done'  #DONE
                         promised.resolve resultObj
                         action.resolve()

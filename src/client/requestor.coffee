@@ -21,8 +21,8 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
 
             {resolve, reject, notify} = action
 
-            newRequest = new HttpRequest promised, opts
-            newRequest.onDone = requestor.done
+            # newRequest = new HttpRequest promised, opts
+            # newRequest.onDone = requestor.done
 
             sequence([
 
@@ -31,7 +31,7 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
                 #   externally promised response 
                 # 
 
-                -> queue.enqueue newRequest
+                -> queue.enqueue new HttpRequest promised, opts
                         
                 #
                 # * dequeue any previously accumulated requests 
@@ -69,7 +69,7 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
             )
 
 
-        done: deferred (action, error, httpRequest) -> 
+        doNext: deferred (action) -> 
 
             #
             # TODO: nothing is monitoring this promise 
@@ -87,12 +87,13 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
 
             sequence([
 
-                -> queue.done error, httpRequest
                 -> queue.dequeue()
 
             ]).then(
 
-                ([NULL, requests]) -> 
+                ([requests]) -> 
+
+                    console.log NEXT: requests
 
                     parallel( for httpRequest in requests
 
@@ -111,6 +112,8 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
             {resolve, reject, notify} = action
             queue.stats().then resolve, reject, notify
 
+
+    queue.on 'object::done', requestor.doNext
 
 
     return api =

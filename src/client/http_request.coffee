@@ -26,8 +26,6 @@ module.exports = class HttpReuquest
             set: (value) => 
                 local.state.value = value
                 local.state.at = Date.now()
-                switch value
-                    when 'done' then onDone @error, this #DONE
 
         Object.defineProperty this, 'stateAt', 
             enumerable: true

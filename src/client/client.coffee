@@ -26,7 +26,7 @@ exports.Client = enclose Requestor, (requestor, config) ->
         stats: deferred (action) -> 
 
             {resolve, reject, notify} = action
-            superclass.stats().then resolve, reject, notify
+            requestor.stats().then resolve, reject, notify
 
 
     return api = 

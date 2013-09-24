@@ -126,6 +126,7 @@ exports.Queue = (config = {}) ->
         dequeue: queue.dequeue
         requeue: queue.requeue
         update:  queue.update
+        on:      ->
         stats:   queue.stats
 
 
