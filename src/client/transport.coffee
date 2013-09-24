@@ -1,7 +1,7 @@
 {deferred} = require '../support'
 
-transport = undefined
-exports._transport = -> transport
+testable = undefined
+exports._transport = -> testable
 
 exports.Transport = (config, queue) -> 
 
@@ -140,6 +140,11 @@ exports.Transport = (config, queue) ->
             request.end()
             httpRequest.state = 'sent'
 
+    #
+    # only the latest instance is accessable to test
+    #
+
+    testable = transport
 
     return api = 
 

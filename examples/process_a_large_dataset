@@ -59,16 +59,12 @@ pipeline( [
 
 interval = setInterval (->
 
-    #
-    # TODO: they share a queue, or it appears that way, somewhat surprised... (FIX!!!)
-    #
-
     client1.stats().then (stats) -> 
 
-        console.log "\n1 pending: #{stats.pending.count}, active: #{stats.active.count}, done: #{stats.done.count} "
+        console.log "\nclient1 -- pending: #{stats.pending.count}, active: #{stats.active.count}, done: #{stats.done.count} "
     
     client2.stats().then (stats) -> 
 
-        console.log "2 pending: #{stats.pending.count}, active: #{stats.active.count}, done: #{stats.done.count} "
+        console.log "client2 -- pending: #{stats.pending.count}, active: #{stats.active.count}, done: #{stats.done.count} "
 
 ), 1000

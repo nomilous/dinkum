@@ -1,8 +1,8 @@
 {deferred} = require '../support'
 {EventEmitter} = require 'events'
 
-queue = undefined
-exports._queue = -> queue
+testable = undefined
+exports._queue = -> testable
 
 exports.Queue = (config = {}) -> 
 
@@ -98,8 +98,6 @@ exports.Queue = (config = {}) ->
 
                 when 'done'
 
-                    console.log done: 1
-
                     seq = object.sequence.toString()
                     if queue.active.items[seq]?
                         queue.active.count--
@@ -107,8 +105,6 @@ exports.Queue = (config = {}) ->
                         queue.finished.count++
                     action.resolve()
                     queue.emitter.emit 'object::done'
-
-                    console.log done: 2
                     return
 
                 else action.resolve()
@@ -128,6 +124,11 @@ exports.Queue = (config = {}) ->
                 done: 
                     count: queue.finished.count
 
+    #
+    # only the latest instance is accessable to test
+    #
+
+    testable = queue
 
     api = 
 
@@ -140,11 +141,8 @@ exports.Queue = (config = {}) ->
         #
         # TODO: may need to export emitter.otherApiBits('too')
         #
-        on: (event, handler) ->     
-
-            console.log arguments
-            queue.emitter.on
-        
+        # on: queue.emitter.on
+        on: (event, handler) -> queue.emitter.on event, handler
 
 
     Object.defineProperty api, 'suspend', 

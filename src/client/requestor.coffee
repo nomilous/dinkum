@@ -6,8 +6,8 @@ sequence        = require 'when/sequence'
 parallel       = require 'when/parallel'
 
 count = 0
-requestor = undefined
-exports._requestor = -> requestor
+testable = undefined
+exports._requestor = -> testable
 
 exports.Requestor = enclose Queue, (queue, config = {}) -> 
 
@@ -75,8 +75,6 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
             # TODO: nothing is monitoring this promise 
             #
 
-            console.log DO_NEXT: 1
-
             {resolve, reject, notify} = action 
 
             #
@@ -94,8 +92,6 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
             ]).then(
 
                 ([requests]) -> 
-
-                    console.log NEXT: requests
 
                     parallel( for httpRequest in requests
 
@@ -116,6 +112,13 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
 
 
     queue.on 'object::done', requestor.doNext
+
+
+    #
+    # only the latest instance is accessable to test
+    #
+
+    testable = requestor
 
 
     return api =

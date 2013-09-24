@@ -14,6 +14,7 @@ describe 'Transport', ->
     beforeEach -> 
         httpr  = http.request
         httpsr = https.request
+        @mockQueue = update: -> then: (resolve) -> resolve()
 
     afterEach -> 
         http.request  = httpr
@@ -28,7 +29,7 @@ describe 'Transport', ->
                 end: ->
                 on: ->
 
-            instance = Transport transport: 'http'
+            instance = Transport transport: 'http' 
             instance.request opts: {}, sequence: 1, promised: {}
 
         it 'can send an https request', (done) -> 
@@ -37,8 +38,10 @@ describe 'Transport', ->
                 done()
                 end: ->
                 on: ->
-            instance = Transport transport: 'https'
-            instance.request opts: {}, promised: {}, sequence: 2
+
+            instance = Transport { transport: 'https' }, @mockQueue
+            instance.request opts: {}, sequence: 2, promised: {}
+
 
 
         it 'assigns hostname, port from config', (done) -> 
@@ -93,7 +96,7 @@ describe 'Transport', ->
                             setTimeout: (value) -> value.should.equal 20
                             on: (event, listener) -> if event == 'timeout' then listener()
                 
-            instance = Transport transport: 'https', connectTimeout: 20
+            instance = Transport { transport: 'https', connectTimeout: 20 }, @mockQueue
             instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised: 
                 reject: (error) -> 
                     error.should.match /dinkum connect timeout/
@@ -110,7 +113,7 @@ describe 'Transport', ->
                             setTimeout: (value) -> 
                                 throw 'should not set timeout'
                 
-            instance = Transport transport: 'https', connectTimeout: 0
+            instance = Transport { transport: 'https', connectTimeout: 0 }, @mockQueue
             instance.request  opts: { method: 'GET', path: '/' }, sequence: 1, promised: {}
             done()
 
@@ -132,7 +135,7 @@ describe 'Transport', ->
 
         it 'accumulates body as string and resolves including header and status code', (done) ->
 
-            instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
+            instance = Transport { transport: 'https', port: 3000, hostname: 'localhost' }, @mockQueue
             https.request = (opts, callback) -> 
                 callback
                     headers:    'HEADERS'
@@ -173,6 +176,7 @@ describe 'Transport', ->
                 transport:  'https'
                 allowUncertified: true
                 port:       3001
+                @mockQueue
 
             mockHttpRequest = 
                 opts: path: '/', method: 'GET'

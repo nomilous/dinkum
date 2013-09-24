@@ -2,8 +2,8 @@
 {defer}     = require 'when'
 {Requestor} = require './requestor'
 
-client = undefined
-exports._client = -> client
+testable = undefined
+exports._client = -> testable
 
 exports.Client = enclose Requestor, (requestor, config) -> 
 
@@ -28,6 +28,11 @@ exports.Client = enclose Requestor, (requestor, config) ->
             {resolve, reject, notify} = action
             requestor.stats().then resolve, reject, notify
 
+    #
+    # only the latest instance is accessable to test
+    #
+
+    testable = client
 
     return api = 
 
