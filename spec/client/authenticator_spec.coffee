@@ -4,12 +4,22 @@ should = require 'should'
 
 describe 'Authenticator', ->
 
-    context 'authenticate', -> 
+    context 'first call to authenticate()', -> 
+
+        it 'sets authenticating to true', (done) -> 
+
+            instance = Authenticator()
+            _authenticator().authenticating.should.equal false
+            instance.authenticate()
+            _authenticator().authenticating.should.equal true
+            done()
+
 
     context 'integrations', -> 
 
-        it 'is assigned the queue via enclosed config-chain requestor..trnasport..', (done) -> 
+        it 'is assigned the queue via enclosed config-chain requestor..transport..', (done) -> 
 
             requestor = Requestor()
             should.exist _authenticator().queue
             done()
+
