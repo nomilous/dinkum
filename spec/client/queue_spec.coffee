@@ -103,6 +103,25 @@ describe 'Queue', ->
                 done()
 
 
+    context 'queue.update', ->
+
+        it 'can advance object state to done', (done) ->
+
+            instance = Queue()
+            instance.enqueue( object: 'A' ).then ->
+                instance.dequeue().then (objects) ->
+
+                    instance.update( 'done', objects[0] ).then ->
+
+                        instance.stats().then (stats) ->
+                            testable().active.items.should.eql {}
+                            stats.active.count.should.equal 0
+                            stats.done.count.should.equal 1
+                            done()
+
+
+
+
     context 'queue.redo', -> 
 
         it 'requeues objects back onto the front of the queue', (done) -> 
@@ -115,9 +134,10 @@ describe 'Queue', ->
                 -> instance.enqueue object: 'C'
                 -> instance.enqueue object: 'D'
             ]).then -> instance.dequeue().then (objects) -> 
+
                 sequence([
-                    -> instance.done null, objects[1]
-                    -> instance.done null, objects[2]
+                    -> instance.update 'done', objects[1]
+                    -> instance.update 'done', objects[2]
                     -> instance.requeue objects[0]
                     -> instance.dequeue()
                 ]).then ([done1, done2, requeued, dequeued]) -> 
@@ -167,24 +187,6 @@ describe 'Queue', ->
                         objects.should.eql [ { object: 'A', sequence: 1 } ]
                         done()
                     
-
-    context 'queue.done', ->
-
-        it 'removes done object from the active list', (done) ->
-
-            instance = Queue()
-            instance.enqueue( object: 'A' ).then ->
-                instance.dequeue().then (objects) ->
-                    error = null
-                    instance.done( error, objects[0] ).then ->
-                        instance.stats().then (stats) ->
-
-                            testable().active.items.should.eql {}
-                            stats.active.count.should.equal 0
-                            stats.done.count.should.equal 1
-                            done()
-
-
 
     context 'queue.stats', -> 
 

@@ -90,21 +90,23 @@ exports.Queue = (config = {}) ->
                 action.reject error
 
 
-        done: deferred (action, error, object) -> 
+        update: deferred (action, state, object) -> 
 
-            #
-            # * adjust as done
-            # * resolve action
-            #
+            try 
+                switch state
 
-            seq = object.sequence.toString()
-            if queue.active.items[seq]?
-                queue.active.count--
-                delete queue.active.items[seq]
-                queue.finished.count++
+                    when 'done' 
+                        seq = object.sequence.toString()
+                        if queue.active.items[seq]?
+                            queue.active.count--
+                            delete queue.active.items[seq]
+                            queue.finished.count++
 
-            action.resolve()
+                action.resolve()
 
+            catch error
+
+                action.reject error
 
 
         stats: deferred (action) ->
@@ -123,7 +125,7 @@ exports.Queue = (config = {}) ->
         enqueue: queue.enqueue
         dequeue: queue.dequeue
         requeue: queue.requeue
-        done:    queue.done
+        update:  queue.update
         stats:   queue.stats
 
 
