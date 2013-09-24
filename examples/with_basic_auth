@@ -1,0 +1,21 @@
+#! /usr/bin/env coffee
+
+{Client} = require '../lib/dinkum'
+
+c = Client.create
+
+    hostname: 'localhost'
+    allowUncertified: true
+    port:      3000
+    
+    authenticator: 
+        module:   'basic_auth'
+        username: 'nomilous'
+        password: '¿'
+
+c.get( path: '/requires/authentication' ).then(
+
+    (result) -> console.log RESULT: result
+    (error)  -> console.log ERROR:  error
+
+)

@@ -7,19 +7,42 @@ describe 'Authenticator', ->
 
     before -> 
         @config = 
-            authenticator: {}
+            authenticator: 
+                module: 'basic_auth'
 
     context 'first call to authenticate()', -> 
+
 
         it 'rejects the request promise if no authentication scheme is specified', (done) -> 
 
             instance = Authenticator()
             instance.authenticate promised: reject: (error) -> 
 
-                error.should.match /dinkum absence of authenticator config/
+                error.should.match /dinkum absence of authenticator scheme/
 
                 done()
 
+
+        it 'assigns the authenticator scheme', (done) -> 
+
+            instance = Authenticator @config
+            instance.authenticate sequence: 1
+            should.exist _authenticator().scheme
+            done()
+
+        it 'assigns the authenticator scheme only once', (done) ->
+
+            instance = Authenticator @config
+            instance.authenticate sequence: 1
+            should.exist _authenticator().scheme
+            _authenticator().scheme.TEST = 1
+
+            instance.authenticate sequence: 1
+            _authenticator().scheme.TEST.should.equal 1
+            done()
+
+
+        it 'can use node_module (plugin) as authenticator scheme'
 
         it 'sets authenticating to the sequence number of the first request', (done) -> 
 
@@ -29,6 +52,7 @@ describe 'Authenticator', ->
             _authenticator().authenticating.should.equal 1
             done()
 
+
         it 'resolves with an authentication request', (done) ->
 
             instance = Authenticator @config
@@ -36,6 +60,7 @@ describe 'Authenticator', ->
 
                 request.should.be.an.instanceof HttpRequest
                 done()
+
 
         it 'suspends the queue'
 

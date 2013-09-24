@@ -10,6 +10,13 @@ exports.Client =
         config.requestLimit     ?= 10
         config.connectTimeout  ||= 0
         config.allowUncertified ?= false
+
+        #
+        #   config.authenticator = 
+        #       module:   'basic_auth'
+        #       username: 'username'
+        #       password: 'password'
+        #
         
         return Client config
 
