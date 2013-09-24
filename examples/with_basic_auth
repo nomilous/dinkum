@@ -3,27 +3,49 @@
 {Client} = require '../lib/dinkum'
 parallel = require 'when/parallel'
 
-c = Client.create
 
+withoutAuth = Client.create
     hostname: 'localhost'
     allowUncertified: true
     port:      3000
-    
-    authenticator: 
-        module:   'basic_auth_session'
-        username: 'nomilous'
-        password: '∆'
+    # authenticator: 
+    #     module:   'basic_auth'
+    #     username: 'nomilous'
+    #     password: '∆'
 
 parallel([
 
-    -> c.get path: '/requires/authentication/1' 
-    -> c.get path: '/requires/authentication/2' 
-    -> c.get path: '/requires/authentication/3' 
-
+    -> withoutAuth.get path: '/requires/basic_auth/1' 
+    -> withoutAuth.get path: '/requires/basic_auth/2' 
+    -> withoutAuth.get path: '/requires/basic_auth/3' 
 
 ]).then(
 
     (result) -> console.log RESULT: result
     (error)  -> console.log ERROR:  error
+
+)
+
+
+withAuth = Client.create
+    hostname: 'localhost'
+    allowUncertified: true
+    port:      3000
+    authenticator: 
+        module:   'basic_auth'
+        username: 'nomilous'
+        password: '∆'
+
+parallel([
+
+    -> withAuth.get    path: '/requires/basic_auth/1' 
+    -> withAuth.get    path: '/requires/basic_auth/2' 
+    -> withAuth.get    path: '/requires/basic_auth/3' 
+
+
+]).then(
+
+    (result) -> console.log RESULT: result
+    (error)  -> 
 
 )

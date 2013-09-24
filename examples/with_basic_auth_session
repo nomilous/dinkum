@@ -1,0 +1,28 @@
+#! /usr/bin/env coffee
+
+{Client} = require '../lib/dinkum'
+parallel = require 'when/parallel'
+
+withAuth = Client.create
+    hostname: 'localhost'
+    allowUncertified: true
+    port:      3000
+    authenticator: 
+        # module:   'basic_auth'
+        module:   'basic_auth_session'
+        username: 'nomilous'
+        password: '∆'
+
+parallel([
+
+    -> withAuth.get path: '/requires/basic_auth/1' 
+    -> withAuth.get path: '/requires/basic_auth/2' 
+    -> withAuth.get path: '/requires/basic_auth/3' 
+
+
+]).then(
+
+    (result) -> console.log RESULT: result
+    (error)  -> 
+
+)
