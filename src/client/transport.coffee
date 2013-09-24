@@ -33,24 +33,23 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
             {resolve, reject, notify}  = action
             {opts, promised, sequence} = httpRequest
 
-            if authenticator.type == 'request'
+            requestOpts          = {}
+            requestOpts.port     = config.port if config.port?
+            requestOpts.hostname = config.hostname
+            requestOpts.method   = opts.method
+            requestOpts.path     = opts.path
 
-                unless authenticator.requestAuth httpRequest
+            if authenticator.type == 'request'
+                unless authenticator.requestAuth requestOpts
+
+                    #
+                    # authenticator.scheme is of type=request but did not
+                    # implement the requestAuth() method
+                    # 
 
                     reject()
                     return
-
-
-            requestOpts = {}
-
-            requestOpts.port     = config.port if config.port?
-            requestOpts.hostname = config.hostname
-            
-            requestOpts.method   = opts.method
-            requestOpts.path     = opts.path
-            requestOpts.auth     = opts.auth if opts.auth?
-
-
+                    
 
             httpRequest.state = 'create'
             request = require( config.transport ).request requestOpts, (response) -> 
@@ -179,7 +178,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
                                     #       or send a sequence of requests to perform the auth,
                                     # 
                                     #       this call to finish() assumes that the current request
-                                    #       in resultObj is the original request that requered the
+                                    #       in resultObj is the original request that required the
                                     #       authentication, it is resolved into the external callers
                                     #       request promise (FIX)
                                     #
