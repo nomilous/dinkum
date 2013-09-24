@@ -5,23 +5,39 @@ should = require 'should'
 
 describe 'Authenticator', ->
 
+    before -> 
+        @config = 
+            authenticator: {}
+
     context 'first call to authenticate()', -> 
 
-        it 'sets authenticating to true', (done) -> 
+        it 'rejects the request promise if no authentication scheme is specified', (done) -> 
 
             instance = Authenticator()
-            _authenticator().authenticating.should.equal false
-            instance.authenticate()
-            _authenticator().authenticating.should.equal true
+            instance.authenticate promised: reject: (error) -> 
+
+                error.should.match /dinkum absence of authenticator config/
+
+                done()
+
+
+        it 'sets authenticating to the sequence number of the first request', (done) -> 
+
+            instance = Authenticator @config
+            _authenticator().authenticating.should.equal 0
+            instance.authenticate sequence: 1
+            _authenticator().authenticating.should.equal 1
             done()
 
         it 'resolves with an authentication request', (done) ->
 
-            instance = Authenticator()
-            instance.authenticate().then (request) -> 
+            instance = Authenticator @config
+            instance.authenticate( sequence: 1 ).then (request) -> 
 
                 request.should.be.an.instanceof HttpRequest
                 done()
+
+        it 'suspends the queue'
 
 
     context 'subsequent calls to authenticate()', -> 

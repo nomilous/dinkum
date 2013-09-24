@@ -103,8 +103,15 @@ exports.Queue = (config = {}) ->
                         queue.active.count--
                         delete queue.active.items[seq]
                         queue.finished.count++
-                    action.resolve()
                     queue.emitter.emit 'object::done'
+
+                    #
+                    # nextTick to ensure all execution chains 
+                    # on the event listenters are run ahead of 
+                    # the action resolution
+                    #
+
+                    process.nextTick -> action.resolve()
                     return
 
                 else action.resolve()
