@@ -1,10 +1,12 @@
 testable = undefined
 exports._authenticator = -> testable
 
-exports.Authenticator = (config) -> 
+exports.Authenticator = (config, queue) -> 
 
     authenticator = 
 
+        queue: queue
+        
         authenticate: -> 
     
     #
