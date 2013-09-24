@@ -1,3 +1,11 @@
+#
+# BasicAuthSession
+# ================
+# 
+# For API servers that require a once-off BASIC authentication
+# and provide a resulting session context using cookies. 
+#
+
 module.exports = (config) ->
 
     basicAuth =
