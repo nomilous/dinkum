@@ -11,7 +11,7 @@ exports.Transport = (config, queue) ->
         options.rejectUnauthorized = not config.allowUncertified
     
     transport = 
-        
+
         queue: queue
 
         request: deferred (action, httpRequest) -> 
@@ -72,9 +72,16 @@ exports.Transport = (config, queue) ->
                     # * completed / closed inbound socket 
                     # 
 
-                    httpRequest.state = 'done'  #DONE
-                    promised.resolve resultObj
-                    action.resolve()
+                    if resultObj.statusCode == 401
+
+                        httpRequest.state = 'authenticate'
+                        action.resolve()
+
+                    else
+
+                        httpRequest.state = 'done'  #DONE
+                        promised.resolve resultObj
+                        action.resolve()
 
 
             request.on 'socket', (socket) -> 
