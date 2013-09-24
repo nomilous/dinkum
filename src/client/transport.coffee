@@ -1,10 +1,17 @@
 {enclose, deferred} = require '../support'
 {Authenticator}     = require './authenticator'
+CookieStore         = require './cookie_store'
 
 testable = undefined
 exports._transport = -> testable
 
 exports.Transport = enclose Authenticator, (authenticator, config, queue) -> 
+
+    #
+    # cookies always enabled for now
+    #
+
+    cookies = CookieStore.create config
 
     if config.transport == 'https' 
 
@@ -28,8 +35,6 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
             #   result promise (httpRequest.promised)
             # 
 
-            console.log 'TODO: switch on cookie store'
-
             {resolve, reject, notify}  = action
             {opts, promised, sequence} = httpRequest
 
@@ -49,7 +54,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
                     reject()
                     return
-                    
+
 
             httpRequest.state = 'create'
             request = require( config.transport ).request requestOpts, (response) -> 
@@ -72,6 +77,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
 
                     httpRequest.state = 'receive'
                     resultObj.body += chunk.toString()
+
 
                 response.on 'error', (error) -> 
 

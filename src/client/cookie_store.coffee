@@ -1,10 +1,12 @@
-exports.create = (config) ->
+exports.create = (config = {}) ->
 
-    throw new Error( 
+    config.hostname ||= 'localhost' 
 
-        'CookieStore.create(config) requires config.hostname'
+    # throw new Error( 
 
-    ) unless config.hostname?
+    #     'CookieStore.create(config) requires config.hostname'
+
+    # ) unless config.hostname?
 
     #
     # store factory initialized with hostname to allow
