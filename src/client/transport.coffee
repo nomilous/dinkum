@@ -1,10 +1,9 @@
-{enclose, deferred} = require '../support'
-{Queue}            = require './queue'
+{deferred} = require '../support'
 
 transport = undefined
 exports.testable = -> transport
 
-exports.Transport = (config) -> 
+exports.Transport = (config, queue) -> 
 
     if config.transport == 'https' 
 
@@ -12,6 +11,9 @@ exports.Transport = (config) ->
         options.rejectUnauthorized = not config.allowUncertified
     
     transport = 
+        
+        queue: queue
+
         request: deferred (action, httpRequest) -> 
 
             #
@@ -34,7 +36,6 @@ exports.Transport = (config) ->
 
             httpRequest.state = 'create'
             request = require( config.transport ).request requestOpts, (response) -> 
-
 
                 httpRequest.state = 'response'
                 resultObj = 

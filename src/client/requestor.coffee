@@ -15,7 +15,7 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
 
         queue: queue # testability
 
-        transport: Transport config
+        transport: Transport config, queue
 
         request: deferred (action, opts, promised) -> 
 

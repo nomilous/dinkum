@@ -1,4 +1,5 @@
 {testable, Transport} = require '../../lib/client/transport'
+{Requestor} = require '../../lib/client/requestor'
 http      = require 'http'
 https     = require 'https'
 should    = require 'should'
@@ -15,6 +16,12 @@ describe 'Transport', ->
     afterEach -> 
         http.request  = httpr
         https.request = httpsr
+
+    it 'is initialized with queue (by the Requestor)', (done) ->
+
+        requestor = Requestor transport: 'https'
+        should.exist testable().queue
+        done()
 
 
     it 'can send an http request', (done) -> 
