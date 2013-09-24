@@ -8,7 +8,7 @@ module.exports = (config) ->
 
         failedAuth: (action) -> 
 
-            error = new Error 'dinkum session authentication failure'
+            error = new Error 'dinkum authentication failure (session)'
             try error.detail = basicAuth.originalRequest.opts
             basicAuth.originalRequest.promised.reject error
             basicAuth.originalRequest = undefined

@@ -95,7 +95,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue) ->
                             #
 
                             reject()
-                            error = new Error 'dinkum authentication failure'
+                            error = new Error 'dinkum authentication failure (request)'
                             error.detail = requestOpts
                             httpRequest.promised.reject error
                             return
