@@ -11,7 +11,7 @@ c = Client.create
     authenticator: 
         module:   'basic_auth'
         username: 'nomilous'
-        password: '¿'
+        password: '∆'
 
 c.get( path: '/requires/authentication' ).then(
 
