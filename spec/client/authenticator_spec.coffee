@@ -150,3 +150,6 @@ describe 'Authenticator', ->
             should.exist _authenticator().cookies
             done()
 
+
+
+

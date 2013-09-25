@@ -49,7 +49,7 @@ module.exports = (config, queue, cookies) ->
 
             basicAuth.originalRequest = forbiddenRequest
             authRequest = forbiddenRequest
-            authRequest.authenticator = 'basic_auth'
+            authRequest.authenticator = 'basic_auth_session'
 
             username = config.authenticator.username
             password = config.authenticator.password

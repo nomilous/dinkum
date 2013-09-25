@@ -37,6 +37,12 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue, cookie
             requestOpts.hostname = config.hostname
             requestOpts.method   = opts.method
             requestOpts.path     = opts.path
+            requestOpts.auth     = opts.auth if opts.auth
+
+            if cookie = cookies.getCookie()
+                
+                requestOpts.headers ||= {}
+                requestOpts.headers.cookie = cookie
 
             if authenticator.type == 'request'
                 unless authenticator.requestAuth requestOpts
@@ -52,6 +58,10 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue, cookie
 
             httpRequest.state = 'create'
             request = require( config.transport ).request requestOpts, (response) -> 
+
+                if response.headers['set-cookie']?
+                    cookies.setCookie response.headers['set-cookie']
+
 
                 httpRequest.state = 'response'
                 resultObj = 

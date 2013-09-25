@@ -17,6 +17,7 @@ describe 'Transport', ->
         httpr  = http.request
         httpsr = https.request
         @mockQueue = update: -> then: (resolve) -> resolve()
+        @mockCookiesStore = getCookie: ->
 
     afterEach -> 
         http.request  = httpr
@@ -31,7 +32,7 @@ describe 'Transport', ->
                 end: ->
                 on: ->
 
-            instance = Transport transport: 'http'
+            instance = Transport {transport: 'http'}, @mockQueue, @mockCookiesStore
             instance.request opts: {}, sequence: 1, promised: {}
 
         it 'can send an https request', (done) -> 
@@ -41,7 +42,7 @@ describe 'Transport', ->
                 end: ->
                 on: ->
 
-            instance = Transport { transport: 'https' }, @mockQueue
+            instance = Transport { transport: 'https' }, @mockQueue, @mockCookiesStore
             instance.request opts: {}, sequence: 2, promised: {}
 
 
@@ -55,13 +56,13 @@ describe 'Transport', ->
                 end: ->
                 on: ->
 
-            instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
+            instance = Transport { transport: 'https', port: 3000, hostname: 'localhost' }, @mockQueue, @mockCookiesStore
             instance.request opts: {}, promised: {}, sequence: 1
 
 
         it 'assigns method, path from opts', (done) -> 
 
-            instance = Transport transport: 'https', port: 3000, hostname: 'localhost'
+            instance = Transport {transport: 'https', port: 3000, hostname: 'localhost'}, @mockQueue, @mockCookiesStore
             https.request = (opts) -> 
                 opts.method.should.equal 'GET'
                 opts.path.should.equal '/'
@@ -79,7 +80,7 @@ describe 'Transport', ->
                 on: (event, listener) -> if event == 'error'
                     listener new Error 'DEPTH_ZERO_SELF_SIGNED_CERT'
 
-            instance = Transport {transport: 'https', port: 3000, hostname: 'localhost'}, @mockQueue
+            instance = Transport {transport: 'https', port: 3000, hostname: 'localhost'}, @mockQueue, @mockCookiesStore
             instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised:
                 reject: (error) -> 
                     error.should.match /use config.allowUncertified to trust it/
@@ -98,7 +99,7 @@ describe 'Transport', ->
                             setTimeout: (value) -> value.should.equal 20
                             on: (event, listener) -> if event == 'timeout' then listener()
                 
-            instance = Transport { transport: 'https', connectTimeout: 20 }, @mockQueue
+            instance = Transport { transport: 'https', connectTimeout: 20 }, @mockQueue, @mockCookiesStore
             instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised: 
                 reject: (error) -> 
                     error.should.match /dinkum connect timeout/
@@ -115,7 +116,7 @@ describe 'Transport', ->
                             setTimeout: (value) -> 
                                 throw 'should not set timeout'
                 
-            instance = Transport { transport: 'https', connectTimeout: 0 }, @mockQueue
+            instance = Transport { transport: 'https', connectTimeout: 0 }, @mockQueue, @mockCookiesStore
             instance.request  opts: { method: 'GET', path: '/' }, sequence: 1, promised: {}
             done()
 
@@ -128,7 +129,7 @@ describe 'Transport', ->
                     listener new Error "assumption"
 
 
-            instance = Transport { transport: 'https', port: 3000, hostname: 'localhost' }, @mockQueue
+            instance = Transport { transport: 'https', port: 3000, hostname: 'localhost' }, @mockQueue, @mockCookiesStore
             instance.request opts: { method: 'GET', path: '/' }, sequence: 1, promised:
                 reject: (error) -> 
                     error.should.match /assumption/
@@ -137,7 +138,7 @@ describe 'Transport', ->
 
         it 'accumulates body as string and resolves including header and status code', (done) ->
 
-            instance = Transport { transport: 'https', port: 3000, hostname: 'localhost' }, @mockQueue
+            instance = Transport { transport: 'https', port: 3000, hostname: 'localhost' }, @mockQueue, @mockCookiesStore
             https.request = (opts, callback) -> 
                 callback
                     headers:    'HEADERS'
@@ -179,6 +180,7 @@ describe 'Transport', ->
                 allowUncertified: true
                 port:       3001
                 @mockQueue
+                @mockCookiesStore
 
             mockHttpRequest = 
                 opts: path: '/', method: 'GET'
@@ -204,6 +206,9 @@ describe 'Transport', ->
                 port:       3001
                 authenticator: 
                     module: 'basic_auth_session'
+                @mockQueue
+                @mockCookiesStore 
+
 
             mockHttpRequest = 
                 opts: path: '/', method: 'GET'
@@ -234,7 +239,8 @@ describe 'Transport', ->
                 authenticator: 
                     module: 'basic_auth_session'
                 @mockQueue
-
+                @mockCookiesStore 
+                
             mockHttpRequest = 
                 opts: path: '/', method: 'GET'
                 promised:
@@ -287,6 +293,7 @@ describe 'Transport', ->
                 authenticator: 
                     module: 'basic_auth_session'
                 @mockQueue
+                @mockCookiesStore
 
             mockHttpRequest = 
                 opts: path: '/', method: 'GET'
