@@ -31,8 +31,6 @@ module.exports = (config, fn) ->
 
         if config.content[type].encode?
 
-            console.log config.content[type].encode
-
             localFilters[type] = config.content[type].encode
 
     return (opts, more...) -> 
