@@ -1,7 +1,7 @@
 {
   "name": "dinkum",
-  "description": "API Client Tools",
-  "version": "0.0.0",
+  "description": "API Tools",
+  "version": "0.0.1",
   "author": "nomilous <nomilous@gmail.com>",
   "contributors": [
     {

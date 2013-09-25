@@ -27,29 +27,30 @@ exports.Authenticator = (config, queue, cookies) ->
             return false unless config.authenticator.module?
             return true if authenticator.scheme? # already assigned
 
-            try
+            # 
+            # too early to expose authenticator plugin ablity (unstable api)
+            # 
+            # try
+            #     #
+            #     # * first attempt node_module (plugin) as authenticator scheme
+            #     # 
+            #     #    TODO: Not entirely certain this will load the node module
+            #     #          from the correct node_modules directory.
+            #     #
+            #     modulePath = "#{ config.authenticator.module }"
+            #     authenticator.scheme = require( modulePath ) config, queue, cookies
+            # catch error
+            #     try
+            #         #
+            #         # * fall back to local authenticators
+            #         #
+            #         modulePath = "./authenticators/#{ config.authenticator.module }"
+            #         authenticator.scheme = require( modulePath ) config, queue, cookies
+            # 
 
-                #
-                # * first attempt node_module (plugin) as authenticator scheme
-                # 
-                #    TODO: Not entirely certain this will load the node module
-                #          from the correct node_modules directory.
-                #
-
-                modulePath = "#{ config.authenticator.module }"
+            try 
+                modulePath = "./authenticators/#{ config.authenticator.module }"
                 authenticator.scheme = require( modulePath ) config, queue, cookies
-
-            catch error
-
-                try
-
-                    #
-                    # * fall back to local authenticators
-                    #
-
-                    modulePath = "./authenticators/#{ config.authenticator.module }"
-                    authenticator.scheme = require( modulePath ) config, queue, cookies
-
 
             try authenticator.type = authenticator.scheme.type
 
