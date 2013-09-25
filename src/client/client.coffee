@@ -1,4 +1,5 @@
-{enclose, deferred}   = require 'also'
+{enclose, deferred} = require 'also'
+{RequestFilter}     = require '../support'
 {defer}     = require 'when'
 {Requestor} = require './requestor'
 
@@ -12,7 +13,7 @@ exports.Client = enclose Requestor, (requestor, config) ->
         requestor: requestor # testability
 
 
-        get: (opts, result = defer()) -> 
+        get: RequestFilter (opts, result = defer()) -> 
             opts.method = 'GET'
             requestor.request(opts, result).then(
                 -> 
@@ -22,7 +23,7 @@ exports.Client = enclose Requestor, (requestor, config) ->
             result.promise
 
 
-        post: (opts, result = defer()) ->
+        post: RequestFilter (opts, result = defer()) ->
             opts.method = 'POST'
             requestor.request(opts, result).then(
                 -> 
