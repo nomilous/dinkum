@@ -23,9 +23,7 @@ module.exports = (config, fn) ->
 
         #
         # allows overrides from config.content to customise the
-        # json serialization
-        #some api's want interesting things
-        # eg. 
+        # json serialization, eg. 
         #   
         #  curl -X POST -H 'Content-Type: application/json' \
         #       -d 'JSON{"theActual":"JSON"}' $URL
