@@ -13,7 +13,7 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         requestor: requestor # testability
 
 
-        get: RequestFilter (opts, result = defer()) -> 
+        get: RequestFilter config, (opts, result = defer()) -> 
             opts.method = 'GET'
             requestor.request(opts, result).then(
                 -> 
@@ -23,7 +23,7 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
             result.promise
 
 
-        post: RequestFilter (opts, result = defer()) ->
+        post: RequestFilter config, (opts, result = defer()) ->
             opts.method = 'POST'
             requestor.request(opts, result).then(
                 -> 

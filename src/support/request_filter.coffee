@@ -1,16 +1,27 @@
 
-filters = 
-
+defaultFilters = 
+    
     json: (opts) -> 
-
         console.log WITH_JSON: opts
 
 
-module.exports = (fn) -> (opts, more...) -> 
+module.exports = (config, fn) -> 
 
-    if opts.json? then filters.json opts
+    localFilters = defaultFilters
+    for type of config.content
+        localFilters[type] = config.content[type]
 
-    fn.apply this, arguments
+    return (opts, more...) -> 
+
+        if opts.json? then localFilters.json opts
+
+        #
+        # todo: look for filters / opts.type
+        #       on each request to support
+        #       more than just json
+        #
+
+        fn.apply this, arguments
 
 
-module.exports.filters = filters
+module.exports.filters = defaultFilters
