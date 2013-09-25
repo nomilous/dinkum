@@ -2,4 +2,6 @@
 
 describe 'RequestFilter', -> 
 
-    
+    context 'json', -> 
+
+        

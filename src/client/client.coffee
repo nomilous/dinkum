@@ -6,7 +6,7 @@
 testable = undefined
 exports._client = -> testable
 
-exports.Client = enclose Requestor, (requestor, config) -> 
+exports.Client = enclose Requestor, (requestor, config = {}) -> 
 
     client = 
 

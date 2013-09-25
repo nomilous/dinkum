@@ -1,4 +1,5 @@
 {_client, Client} = require '../../lib/client/client'
+{RequestFilter} = require '../../lib/support' 
 should = require 'should'
 
 describe 'Client', ->
@@ -104,6 +105,17 @@ describe 'Client', ->
                     then: ->
 
                 instance.post path: '/'
+
+
+            it 'processes opts through the json request filter if opts.json was passed to post', (done) -> 
+
+                instance = Client()
+                RequestFilter.filters.json = (opts) -> 
+                    opts.json.should.eql records: {}
+                    done()
+
+                instance.post path: '/', json: records: {}
+
 
         context 'PUT', ->
         context 'DELETE', ->
