@@ -37,7 +37,7 @@ module.exports = (config, fn) ->
 
         if opts.json? then localFilters.json opts
 
-        #
+        # 
         # todo: look for filters / opts.type
         #       on each request to support
         #       more than just json

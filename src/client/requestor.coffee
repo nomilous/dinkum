@@ -25,6 +25,10 @@ exports.Requestor = enclose Queue, (queue, config = {}) ->
 
         request: deferred (action, opts, promised) -> 
 
+            try if opts.method == 'POST'
+
+                console.log POST: opts.body
+
             {resolve, reject, notify} = action
 
             # newRequest = new HttpRequest promised, opts
