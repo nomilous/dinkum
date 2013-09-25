@@ -65,11 +65,11 @@ server = https.createServer
             )
             return
 
-        if req.url.match /\/requires\/basic_auth/
-
-            console.log auth: req.headers.authorization
+        if req.url.match /\/requires\/basic_auth\//
 
             if req.headers.authorization?
+
+                console.log basic_auth: req.headers.authorization
 
                 res.writeHead 200, {}
                 res.end()
@@ -78,6 +78,32 @@ server = https.createServer
             res.writeHead 401, {}
             res.end()
             return
+
+
+        if req.url.match /\/requires\/basic_auth_session/
+
+            if req.headers.cookie?
+
+                console.log basic_auth_using_session_cookie: req.headers.cookie
+                if req.headers.cookie == 'SESSIONID=1; ALSO=4;'
+                    res.writeHead 200, {}
+                    res.end()
+                    return
+                
+            if req.headers.authorization?
+
+                console.log basic_auth_create_session: req.headers.authorization
+                res.writeHead 200, {
+                    'set-cookie': ['SESSIONID=1; Expires=blahblah', 'ALSO=4;']
+                }
+                res.end()
+                return
+
+
+            res.writeHead 401, {}
+            res.end()
+            return
+
 
         setTimeout (->
             res.writeHead 200, {}

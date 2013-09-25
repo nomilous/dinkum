@@ -78,6 +78,8 @@ exports.Authenticator = (config, queue, cookies) ->
 
         startSessionAuth: deferred (action, httpRequest) -> 
 
+            console.log START_AUTH: 1
+
             {resolve, reject, notify} = action
 
             unless authenticator.configured()
@@ -141,6 +143,8 @@ exports.Authenticator = (config, queue, cookies) ->
 
 
         endSessionAuth: deferred (action, httpRequest, httpResponse) -> 
+
+            console.log END_AUTH: 1
 
             try authenticator.scheme.endSessionAuth action, httpRequest, httpResponse
 

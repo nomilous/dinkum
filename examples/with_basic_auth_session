@@ -15,14 +15,16 @@ withAuth = Client.create
 
 sequence([
 
-    -> withAuth.get path: '/requires/basic_auth/1' 
-    -> withAuth.get path: '/requires/basic_auth/2' 
-    -> withAuth.get path: '/requires/basic_auth/3' 
+    -> withAuth.get path: '/requires/basic_auth_session/1' 
+    -> withAuth.get path: '/requires/basic_auth_session/2' 
+    -> withAuth.get path: '/requires/basic_auth_session/3'
+    -> withAuth.get path: '/requires/basic_auth_session/4' 
+    -> withAuth.get path: '/requires/basic_auth_session/5' 
 
 
 ]).then(
 
     (result) -> console.log RESULT: result
-    (error)  -> 
+    (error)  -> console.log ERROR: error
 
 )

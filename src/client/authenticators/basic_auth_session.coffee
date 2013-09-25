@@ -16,6 +16,8 @@ module.exports = (config, queue, cookies) ->
 
         failedAuth: (action) -> 
 
+            console.log AUTH_FAILED: 1
+
             error = new Error 'dinkum authentication failure (session)'
             try error.detail = basicAuth.originalRequest.opts
             basicAuth.originalRequest.promised.reject error
@@ -25,7 +27,7 @@ module.exports = (config, queue, cookies) ->
 
         startSessionAuth: (action, forbiddenRequest) -> 
 
-            if forbiddenRequest.authenticator == 'basic_auth'
+            if forbiddenRequest.authenticator? #  == 'basic_auth_session'
 
                 #
                 # forbiddenRequest has already been marked
