@@ -37,7 +37,8 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue, cookie
             requestOpts.hostname = config.hostname
             requestOpts.method   = opts.method
             requestOpts.path     = opts.path
-            requestOpts.auth     = opts.auth if opts.auth
+            requestOpts.auth     = opts.auth if opts.auth?
+            requestOpts.headers  = opts.headers if opts.headers?
 
             if cookie = cookies.getCookie()
                 
@@ -266,7 +267,13 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue, cookie
                     notify
                 )
 
+            if opts.body? 
 
+                #
+                # TODO: large bodies need dividing
+                #
+
+                request.write opts.body
 
             request.end()
             httpRequest.state = 'sent'
