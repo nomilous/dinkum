@@ -11,17 +11,26 @@ exports.Client = enclose Requestor, (requestor, config) ->
 
         requestor: requestor # testability
 
-        get: (opts, result = defer()) -> 
 
+        get: (opts, result = defer()) -> 
             opts.method = 'GET'
-            
-            requestor.request( opts, result ).then(
+            requestor.request(opts, result).then(
                 -> 
                 result.error
                 result.notify
             )
-
             result.promise
+
+
+        post: (opts, result = defer()) ->
+            opts.method = 'POST'
+            requestor.request(opts, result).then(
+                -> 
+                result.error
+                result.notify
+            )
+            result.promise
+
 
         stats: deferred (action) -> 
 
@@ -36,5 +45,6 @@ exports.Client = enclose Requestor, (requestor, config) ->
 
     return api = 
 
-        get: client.get
+        get:   client.get
+        post:  client.post
         stats: client.stats

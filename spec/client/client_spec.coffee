@@ -84,6 +84,27 @@ describe 'Client', ->
 
         context 'HEAD', -> 
         context 'POST', -> 
+
+            it 'calls requestor.request', (done) ->
+
+                instance = Client()
+                _client().requestor.request = -> 
+                    done()
+                    then: ->
+
+                instance.post path: '/'
+
+
+            it 'sets method POST', (done) -> 
+
+                instance = Client()
+                _client().requestor.request = (opts) ->
+                    opts.method.should.equal 'POST'
+                    done()
+                    then: ->
+
+                instance.post path: '/'
+
         context 'PUT', ->
         context 'DELETE', ->
 
