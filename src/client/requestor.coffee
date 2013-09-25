@@ -1,4 +1,4 @@
-{enclose, deferred} = require '../support'
+{enclose, deferred} = require 'also'
 {Queue}            = require './queue'
 {Transport}       = require './transport'
 HttpRequest      = require './http_request'

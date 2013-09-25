@@ -33,4 +33,3 @@ exports.Client =
 
 exports.Test = require './test'
 
-exports.deferred = require './support/deferred'

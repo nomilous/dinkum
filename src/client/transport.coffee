@@ -1,4 +1,4 @@
-{enclose, deferred} = require '../support'
+{enclose, deferred} = require 'also'
 {Authenticator}     = require './authenticator'
 
 testable = undefined

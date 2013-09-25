@@ -1,4 +1,4 @@
-{deferred} = require '../support'
+{deferred} = require 'also'
 HttpRequest = require './http_request'
  
 testable = undefined

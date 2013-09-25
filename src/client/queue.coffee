@@ -1,4 +1,4 @@
-{deferred} = require '../support'
+{deferred} = require 'also'
 {EventEmitter} = require 'events'
 
 testable = undefined
