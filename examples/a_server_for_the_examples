@@ -1,6 +1,7 @@
 #!/usr/bin/env coffee
 
 https  = require 'https'
+seq    = 0
 server = https.createServer
 
     #
@@ -82,23 +83,28 @@ server = https.createServer
 
         if req.url.match /\/requires\/basic_auth_session/
 
-            if req.headers.cookie?
-
-                console.log basic_auth_using_session_cookie: req.headers.cookie
-                if req.headers.cookie == 'SESSIONID=1; ALSO=4;'
-                    res.writeHead 200, {}
-                    res.end()
-                    return
-                
             if req.headers.authorization?
+
+                #
+                # only one auth is sent by the client 
+                # session id should remain constant for the duration of the exchange
+                #
 
                 console.log basic_auth_create_session: req.headers.authorization
                 res.writeHead 200, {
-                    'set-cookie': ['SESSIONID=1; Expires=blahblah', 'ALSO=4;']
+                    'set-cookie': ["SESSIONID=#{++seq}; Expires=blahblah", 'ALSO=4;']
                 }
                 res.end()
                 return
 
+
+            if req.headers.cookie?
+
+                console.log basic_auth_using_session_cookie: req.headers.cookie
+                if req.headers.cookie == "SESSIONID=#{seq}; ALSO=4;"
+                    res.writeHead 200, {}
+                    res.end()
+                    return
 
             res.writeHead 401, {}
             res.end()

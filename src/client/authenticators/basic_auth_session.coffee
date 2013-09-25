@@ -16,8 +16,6 @@ module.exports = (config, queue, cookies) ->
 
         failedAuth: (action) -> 
 
-            console.log AUTH_FAILED: 1
-
             error = new Error 'dinkum authentication failure (session)'
             try error.detail = basicAuth.originalRequest.opts
             basicAuth.originalRequest.promised.reject error
