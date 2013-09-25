@@ -1,15 +1,41 @@
 
 defaultFilters = 
-    
+
     json: (opts) -> 
-        console.log WITH_JSON: opts
+
+        #
+        # ammend opts with the necessary bits to
+        # post a json request
+        #
+        
+        encoded = JSON.stringify opts.json
+        opts.headers ||= {}
+        opts.headers['content-length'] = encoded.length
+        opts.headers['content-type'] = 'application/json'
+        opts.body = encoded
 
 
 module.exports = (config, fn) -> 
 
     localFilters = defaultFilters
+
     for type of config.content
-        localFilters[type] = config.content[type]
+
+        #
+        # allows overrides from config.content to customise the
+        # json serialization
+        #some api's want interesting things
+        # eg. 
+        #   
+        #  curl -X POST -H 'Content-Type: application/json' \
+        #       -d 'JSON{"theActual":"JSON"}' $URL
+        #
+
+        if config.content[type].encode?
+
+            console.log config.content[type].encode
+
+            localFilters[type] = config.content[type].encode
 
     return (opts, more...) -> 
 

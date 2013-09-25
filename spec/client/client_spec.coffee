@@ -117,12 +117,13 @@ describe 'Client', ->
                 instance.post path: '/', json: records: {}
 
 
-            it.only 'can override the default request filter', (done) -> 
+            it 'can override the default request filter', (done) -> 
 
                 instance = Client
-                    content: json: (opts) -> 
-                        opts.json.should.eql records: {}
-                        done()
+                    content: 
+                        json: encode: (opts) -> 
+                            opts.json.should.eql records: {}
+                            done()
 
                 instance.post path: '/', json: records: {}
 
