@@ -79,6 +79,11 @@ exports.Authenticator = (config, queue, cookies) ->
 
         startSessionAuth: deferred (action, httpRequest) -> 
 
+            #
+            # TODO: move the responsibility of requeueing 
+            #       in the authentication plugin.
+            #
+
             {resolve, reject, notify} = action
 
             unless authenticator.configured()

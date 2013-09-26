@@ -81,8 +81,6 @@ exports.Queue = (config = {}) ->
 
         requeue: deferred (action, object) ->
 
-            console.log REQUEUE: object
-
             try
                 seq = object.sequence.toString()
                 queue.redo.items[seq] = object

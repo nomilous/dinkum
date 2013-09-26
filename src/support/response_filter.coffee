@@ -16,4 +16,5 @@ module.exports = (config) ->
     return (httpResult) -> 
 
         try contentType = httpResult.headers['content-type']
-        if contentType? then localFilters[contentType] httpResult
+        if contentType? and localFilters[contentType]?
+            localFilters[contentType] httpResult
