@@ -35,3 +35,24 @@ describe 'RequestFilter', ->
 
             decoratedRequestor = RequestFilter config, mockRequestor
             decoratedRequestor 'application/json': records: [a:1, b:7]
+
+
+
+        it 'enables userdefined content types', (done) -> 
+
+            mockRequestor = (opts) -> 
+
+                opts.body.should.equal 'a man, a plan, a canal - panama'
+                done()
+
+
+            config =
+                content:
+                    'text/palindrome':
+                        encode: (opts) -> 
+                            body = []
+                            body.unshift char for char in opts['text/palindrome']
+                            opts.body = body.join ''
+
+            decoratedRequestor = RequestFilter config, mockRequestor
+            decoratedRequestor 'text/palindrome': 'amanap - lanac a ,nalp a ,nam a'

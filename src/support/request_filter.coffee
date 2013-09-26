@@ -36,6 +36,23 @@ module.exports = (config, fn) ->
 
         if opts['application/json']? then localFilters['application/json'] opts
 
+        else 
+
+            for contentType of localFilters 
+
+                #
+                # for all configured content types (in created order)
+                # ---------------------------------------------------
+                # 
+                # * if there is an object in the opts hash by the same 
+                #   key then that is the payload
+                # * pass to the corresponding encoder
+                # 
+                
+                if opts[contentType]?
+                    localFilters[contentType] opts
+                    break
+
         # 
         # todo: look for filters / opts.type
         #       on each request to support
