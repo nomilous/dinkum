@@ -1,14 +1,14 @@
 
 defaultFilters = 
 
-    json: (opts) -> 
+    'application/json': (opts) -> 
 
         #
         # ammend opts with the necessary bits to
         # post a json request
         #
         
-        encoded = JSON.stringify opts.json
+        encoded = JSON.stringify opts['application/json']
         opts.headers ||= {}
         opts.headers['content-length'] = encoded.length
         opts.headers['content-type'] = 'application/json'
@@ -35,7 +35,7 @@ module.exports = (config, fn) ->
 
     return (opts, more...) -> 
 
-        if opts.json? then localFilters.json opts
+        if opts['application/json']? then localFilters['application/json'] opts
 
         # 
         # todo: look for filters / opts.type

@@ -110,22 +110,22 @@ describe 'Client', ->
             it 'processes opts through the json request filter if opts.json was passed to post', (done) -> 
 
                 instance = Client()
-                RequestFilter.filters.json = (opts) -> 
-                    opts.json.should.eql records: {}
+                RequestFilter.filters['application/json'] = (opts) -> 
+                    opts['application/json'].should.eql records: {}
                     done()
 
-                instance.post path: '/', json: records: {}
+                instance.post path: '/', 'application/json': records: {}
 
 
             it 'can override the default request filter', (done) -> 
 
                 instance = Client
                     content: 
-                        json: encode: (opts) -> 
-                            opts.json.should.eql records: {}
+                        'application/json': encode: (opts) -> 
+                            opts['application/json'].should.eql records: {}
                             done()
 
-                instance.post path: '/', json: records: {}
+                instance.post path: '/', 'application/json': records: {}
 
 
 
