@@ -1,4 +1,3 @@
-
 defaultFilters = 
 
     'application/json': (opts) -> 

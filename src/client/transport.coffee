@@ -1,11 +1,11 @@
 {enclose, deferred} = require 'also'
+{ResponseFilter}    = require '../support'
 {Authenticator}     = require './authenticator'
 
 testable = undefined
 exports._transport = -> testable
 
 exports.Transport = enclose Authenticator, (authenticator, config, queue, cookies) -> 
-
     if config.transport == 'https' 
 
         options = require('https').globalAgent.options
@@ -20,6 +20,7 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue, cookie
         queue: queue
         authenticator: authenticator
         cookies: cookies
+        contentDecode: ResponseFilter config
 
         request: deferred (action, httpRequest) -> 
 
@@ -99,6 +100,17 @@ exports.Transport = enclose Authenticator, (authenticator, config, queue, cookie
                     # 
                     # * completed / closed inbound socket 
                     # 
+
+                    try transport.contentDecode resultObj
+                    catch error
+
+                        error = new Error 'dinkum content-type decode error'
+                        error.detail =
+                            request: requestOpts
+                            response: resultObj
+                        httpRequest.promised.reject error
+                        return
+
 
                     if resultObj.statusCode == 401
 

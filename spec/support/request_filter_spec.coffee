@@ -3,7 +3,7 @@ should = require 'should'
 
 describe 'RequestFilter', -> 
 
-    context 'json', -> 
+    context 'application/json', -> 
 
         it 'ammends opts (arg1) to post a json request', (done) -> 
 
@@ -18,7 +18,7 @@ describe 'RequestFilter', ->
             decoratedRequestor 'application/json': records: [a:1, b:7]
 
 
-        it.only 'enables override from config', (done) -> 
+        it 'enables override from config', (done) -> 
 
             mockRequestor = (opts) -> 
 
