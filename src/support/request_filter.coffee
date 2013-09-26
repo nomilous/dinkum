@@ -53,12 +53,6 @@ module.exports = (config, fn) ->
                     localFilters[contentType] opts
                     break
 
-        # 
-        # todo: look for filters / opts.type
-        #       on each request to support
-        #       more than just json
-        #
-
         fn.apply this, arguments
 
 
