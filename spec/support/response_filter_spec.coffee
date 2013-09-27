@@ -16,6 +16,17 @@ describe 'ResponseFilter', ->
             httpResult.body.should.eql test: 1
             done()
 
+        it 'uses the first field from the content type header', (done) ->
+
+            httpResult = 
+                headers: 'content-type': 'application/json; charset=utf-8;'
+                body: '{"test":1}'
+
+            filter = ResponseFilter {}
+            filter httpResult
+            httpResult.body.should.eql test: 1
+            done()
+
 
         it 'enables override from config', (done) -> 
 

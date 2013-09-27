@@ -15,6 +15,8 @@ module.exports = (config) ->
 
     return (httpResult) -> 
 
-        try contentType = httpResult.headers['content-type']
-        if contentType? and localFilters[contentType]?
-            localFilters[contentType] httpResult
+        try contentTypeHeader = contentType = httpResult.headers['content-type']
+        if contentTypeHeader?
+            try contentType = contentTypeHeader.match(/(.*?);/)[1]
+            if localFilters[contentType]?
+                localFilters[contentType] httpResult
