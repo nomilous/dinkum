@@ -1,6 +1,6 @@
 `npm install dinkum`
 
-### version 0.0.2 (unstable)
+### version 0.0.3 (unstable)
 
 dinkum
 ======

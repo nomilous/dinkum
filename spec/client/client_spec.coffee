@@ -130,7 +130,31 @@ describe 'Client', ->
 
 
         context 'PUT', ->
+
+            it 'sets method PUT', (done) -> 
+
+                instance = Client()
+                _client().requestor.request = (opts) ->
+                    opts.method.should.equal 'PUT'
+                    done()
+                    then: ->
+
+                instance.put path: '/'
+
+
         context 'DELETE', ->
+
+            it 'sets method DELETE', (done) -> 
+
+                instance = Client()
+                _client().requestor.request = (opts) ->
+                    opts.method.should.equal 'DELETE'
+                    done()
+                    then: ->
+
+                instance.delete path: '/'
+
+
 
     context 'extended methods', ->
 

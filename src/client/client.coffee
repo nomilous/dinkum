@@ -33,6 +33,27 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
             result.promise
 
 
+        put: RequestFilter config, (opts, result = defer()) ->
+            opts.method = 'PUT'
+            requestor.request(opts, result).then(
+                -> 
+                result.error
+                result.notify
+            )
+            result.promise
+
+
+        delete: RequestFilter config, (opts, result = defer()) ->
+            opts.method = 'DELETE'
+            requestor.request(opts, result).then(
+                -> 
+                result.error
+                result.notify
+            )
+            result.promise
+
+
+
         stats: deferred (action) -> 
 
             {resolve, reject, notify} = action
@@ -46,6 +67,8 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
 
     return api = 
 
-        get:   client.get
-        post:  client.post
-        stats: client.stats
+        get:    client.get
+        post:   client.post
+        put:    client.put
+        delete: client.delete
+        stats:  client.stats
