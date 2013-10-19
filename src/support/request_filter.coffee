@@ -9,7 +9,12 @@ defaultFilters =
         
         encoded = JSON.stringify opts['application/json']
         opts.headers ||= {}
-        opts.headers['content-length'] = encoded.length
+
+        #
+        # incorrect length, according to an elasticsearch cluster, grumbles... 
+        #
+
+        #opts.headers['content-length'] = encoded.length
         opts.headers['content-type'] = 'application/json'
         opts.body = encoded
 
