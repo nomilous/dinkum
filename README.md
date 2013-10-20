@@ -5,20 +5,6 @@
 dinkum
 ======
 
-API Tools
-
-
-HTTP(S) Client
---------------
-
-### Example
-
-```coffee
-
-# todo
-
-```
-
 ### What is this thing?
 
 An http(s) request client.
@@ -27,12 +13,12 @@ An http(s) request client.
 
 Seamless integration with [notice](git@github.com:nomilous/notice.git)
 
-* specifically the capacity for request throttling
+* specifically the capacity for request throttling / built in queue
     * to reign the bus in
-    * can lead to a lot of inprocess capsules (but thats another story)
+    * can lead to a lot of inprocess capsules on the bus (but thats another story)
 
 * and the api proxy
-    * properties exposed to serialization on a dinkum instatnce are queryable over the notice api 
+    * properties exposed to serialization on a dinkum instatance are queryable over the notice api 
     * eg. `hubs/:uuid:/tools/dinkumInstance/stats`
     * (later) dinkum instance configurables (eg, queueLimit, requestLimit) can be manpulated over the notice api infrastructure
 
