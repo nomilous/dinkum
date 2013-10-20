@@ -11,7 +11,7 @@ An http(s) request client.
 
 ### Why another one?
 
-Seamless integration with [notice](git@github.com:nomilous/notice.git)
+Seamless integration with [notice](https://github.com/nomilous/notice-example)
 
 * specifically the capacity for request throttling / built in queue
     * to reign the bus in
