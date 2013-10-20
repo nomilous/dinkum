@@ -53,11 +53,34 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
             result.promise
 
 
-
         stats: deferred (action) -> 
 
             {resolve, reject, notify} = action
             requestor.stats().then resolve, reject, notify
+
+        # queued: deferred (action) -> 
+        #     action.resolve {}
+
+        warnings: deferred (action) -> 
+
+            action.resolve {}
+
+        errors: deferred (action) -> 
+
+            action.resolve {}
+
+        config: deferred (action) -> 
+
+            action.resolve {}
+
+
+
+    client.stats.$$notable    = {}
+    client.warnings.$$notable = {}
+    client.errors.$$notable   = {}
+    client.config.$$notable   = {}
+
+
 
     #
     # only the latest instance is accessable to test
@@ -67,8 +90,11 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
 
     return api = 
 
-        get:    client.get
-        post:   client.post
-        put:    client.put
-        delete: client.delete
-        stats:  client.stats
+        get:       client.get
+        post:      client.post
+        put:       client.put
+        delete:    client.delete
+        stats:     client.stats
+        warnings:  client.warnings
+        errors:    client.errors
+        config:    client.config

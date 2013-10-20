@@ -5,22 +5,21 @@
 dinkum
 ======
 
-### What is this thing?
+### What is this dinkum?
 
-An http(s) request client.
+* A [notable](https://github.com/nomilous/notice/tree/master/src/tools) http(s) request client.
+* With 'an attempt' at baking authentication right in.
+* "authentication isn't a field i've hefted any significant accumulation efforts at."
+* This modulename !withstanding.
 
 ### Why another one?
 
-Seamless integration with [notice](https://github.com/nomilous/notice-example)
+* What? 
+* There are others? 
+* Who requested that? ... ;)
+* Seriously tho:
 
-* specifically the capacity for request throttling / built in queue
-    * to reign the bus in
-    * can lead to a lot of inprocess capsules on the bus (but thats another story)
-
-* and the api proxy
-    * properties exposed to serialization on a dinkum instatance are queryable over the notice api 
-    * eg. `hubs/:uuid:/tools/dinkumInstance/stats`
-    * (later) dinkum instance configurables (eg, queueLimit, requestLimit) can be manpulated over the notice api infrastructure
+It's for seamless integration with [notice](https://github.com/nomilous/notice-example)
 
 Todo
 ----
