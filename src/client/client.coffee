@@ -53,6 +53,10 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
             result.promise
 
 
+        #
+        # TODO: convert to also support node style callbacks
+        #
+
         stats: deferred (action) -> 
 
             {resolve, reject, notify} = action
@@ -63,15 +67,15 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
 
         warnings: deferred (action) -> 
 
-            action.resolve {}
+            action.resolve fake: 'warnings'
 
         errors: deferred (action) -> 
 
-            action.resolve {}
+            action.resolve fake: 'errors'
 
         config: deferred (action) -> 
 
-            action.resolve {}
+            action.resolve fake: 'config'
 
 
 
@@ -98,3 +102,5 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         warnings:  client.warnings
         errors:    client.errors
         config:    client.config
+
+
