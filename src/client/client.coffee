@@ -59,10 +59,6 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
 
         stats: deferred (action, opts, callback) -> 
 
-            #
-            # [undecided1](https://github.com/nomilous/notice/commit/252cb1b1497619a8c5219710fe25a175c4c17254)
-            # 
-
             {resolve, reject, notify} = action
             requestor.stats().then( 
                 (stats) -> 
@@ -80,21 +76,19 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         # warnings: deferred (action) -> 
         #     action.resolve fake: 'warnings'
 
-        errors: (opts, callback) -> 
+        errors:
 
-            next = (opts, callback) ->
-            prev = (opts, callback) ->
-            flag = (opts, callback) ->
+            next: (opts, callback) -> callback null, just: 'a thought for now'
+            prev: (opts, callback) -> callback null, but: '...'
+            flag: (opts, callback) -> callback null, this: idea: has: 'juice'
 
-            next.$$notice = {}
-            prev.$$notice = {}
-            flag.$$notice = {}
+            'imagine': ({hub, apiUserEntity, request}, callback) ->  # ...
 
-            callback null,
-                count: 0
-                next: next
-                prev: prev
-                flag: flag 
+
+    client.errors.next.$$notice = {}
+    client.errors.prev.$$notice = {}
+    client.errors.flag.$$notice = {}
+
 
 
         # config: deferred (action) -> 
@@ -105,7 +99,7 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
     client.stats.$$notice = {}
 
     # client.warnings.$$notice = {}
-    client.errors.$$notice   = {}
+    
     # client.config.$$notice   = {}
 
 
