@@ -7,7 +7,7 @@ dinkum
 
 ### What is this dinkum?
 
-* A [notable](https://github.com/nomilous/notice/tree/master/src/tools) http(s) request client.
+* A [noticeable](https://github.com/nomilous/notice/tree/master/src/tools) http(s) request client.
 * With 'an attempt' at baking authentication right in.
 * "authentication isn't a field i've hefted any significant accumulation efforts at."
 * This modulename !withstanding.

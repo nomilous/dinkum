@@ -57,33 +57,37 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         # TODO: convert to also support node style callbacks
         #
 
-        stats: deferred (action) -> 
-
+        stats: deferred (action, opts, callback) -> 
             {resolve, reject, notify} = action
-            requestor.stats().then resolve, reject, notify
+            requestor.stats().then( 
+                (stats) -> 
+                    if callback? then callback null, stats
+                    resolve stats
+                (error) -> 
+                    if callback? then callback error
+                    reject error
+                notify
+            )
 
         # queued: deferred (action) -> 
         #     action.resolve {}
 
-        warnings: deferred (action) -> 
+        # warnings: deferred (action) -> 
+        #     action.resolve fake: 'warnings'
 
-            action.resolve fake: 'warnings'
+        # errors: deferred (action) -> 
+        #     action.resolve fake: 'errors'
 
-        errors: deferred (action) -> 
-
-            action.resolve fake: 'errors'
-
-        config: deferred (action) -> 
-
-            action.resolve fake: 'config'
+        # config: deferred (action) -> 
+        #     action.resolve fake: 'config'
 
 
 
-    client.stats.$$notable    = {}
-    client.warnings.$$notable = {}
-    client.errors.$$notable   = {}
-    client.config.$$notable   = {}
+    client.stats.$$notice = {}
 
+    # client.warnings.$$notice = {}
+    # client.errors.$$notice   = {}
+    # client.config.$$notice   = {}
 
 
     #
@@ -99,8 +103,8 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         put:       client.put
         delete:    client.delete
         stats:     client.stats
-        warnings:  client.warnings
-        errors:    client.errors
-        config:    client.config
+        # warnings:  client.warnings
+        # errors:    client.errors
+        # config:    client.config
 
 
