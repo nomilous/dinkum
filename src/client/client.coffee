@@ -58,6 +58,11 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         #
 
         stats: deferred (action, opts, callback) -> 
+
+            #
+            # [undecided1](https://github.com/nomilous/notice/commit/252cb1b1497619a8c5219710fe25a175c4c17254)
+            # 
+
             {resolve, reject, notify} = action
             requestor.stats().then( 
                 (stats) -> 
@@ -75,8 +80,22 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         # warnings: deferred (action) -> 
         #     action.resolve fake: 'warnings'
 
-        # errors: deferred (action) -> 
-        #     action.resolve fake: 'errors'
+        errors: (opts, callback) -> 
+
+            next = (opts, callback) ->
+            prev = (opts, callback) ->
+            flag = (opts, callback) ->
+
+            next.$$notice = {}
+            prev.$$notice = {}
+            flag.$$notice = {}
+
+            callback null,
+                count: 0
+                next: next
+                prev: prev
+                flag: flag 
+
 
         # config: deferred (action) -> 
         #     action.resolve fake: 'config'
@@ -86,7 +105,7 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
     client.stats.$$notice = {}
 
     # client.warnings.$$notice = {}
-    # client.errors.$$notice   = {}
+    client.errors.$$notice   = {}
     # client.config.$$notice   = {}
 
 
@@ -104,7 +123,7 @@ exports.Client = enclose Requestor, (requestor, config = {}) ->
         delete:    client.delete
         stats:     client.stats
         # warnings:  client.warnings
-        # errors:    client.errors
+        errors:    client.errors
         # config:    client.config
 
 
