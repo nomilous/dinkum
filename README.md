@@ -24,6 +24,7 @@ It's for seamless integration with [notice](https://github.com/nomilous/notice-e
 Todo
 ----
 
+* move queue components into separate module (and use optionally)
 * fix content-length
 * get stats through to the instanceroot
 * include recent N request details in stats
